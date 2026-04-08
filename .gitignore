@@ -1,0 +1,15 @@
+# Node stuff
+node_modules/
+
+# Images (if you don’t want to push them)
+*.jpg
+*.png
+
+# Zip files
+*.zip
+
+# System files
+.DS_Store
+
+# VS Code settings (optional)
+.vscode/

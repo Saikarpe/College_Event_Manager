@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusConnect — College Events</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav>
+  <a class="nav-logo" href="#" onclick="showPage('home')">
+    <div class="logo-mark">C</div>
+    <span class="logo-text">Campus<span>Connect</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#" class="active" onclick="showPage('home');this.closest('ul').querySelectorAll('a').forEach(a=>a.classList.remove('active'));this.classList.add('active')">Events</a></li>
+    <li><a href="#" onclick="showPage('home')">Clubs</a></li>
+    <li><a href="#">Calendar</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn btn-ghost btn-sm" onclick="showPage('login')">Club Login</button>
+    <button class="btn btn-primary btn-sm">🎫 Register</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════
+     PAGE: HOME
+═══════════════════════════════════ -->
+<div id="page-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">Academic Year 2025–26</div>
+    <h1>Discover <em>Events</em><br>Happening on Campus</h1>
+    <p class="hero-sub">Your central hub for all college events — workshops, fests, competitions, seminars and more. Never miss a moment.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" id="stat-upcoming">8<span>+</span></div>
+        <div class="stat-label">Upcoming events</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-num" id="stat-ongoing">3</div>
+        <div class="stat-label">Ongoing today</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Active clubs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search events, clubs…" oninput="applyFilters()">
+    </div>
+    <div class="filter-tabs">
+      <button class="tab active" data-filter="all" onclick="setTab(this,'all')">All</button>
+      <button class="tab" data-filter="ongoing" onclick="setTab(this,'ongoing')">🟢 Ongoing</button>
+      <button class="tab" data-filter="upcoming" onclick="setTab(this,'upcoming')">🟡 Upcoming</button>
+      <button class="tab" data-filter="past" onclick="setTab(this,'past')">Past</button>
+    </div>
+    <select class="club-select" id="clubFilter" onchange="applyFilters()">
+      <option value="all">All Clubs</option>
+      <option value="NSS">NSS</option>
+      <option value="CSI">CSI</option>
+      <option value="Cultural">Cultural Committee</option>
+      <option value="Sports">Sports Club</option>
+      <option value="IEEE">IEEE</option>
+      <option value="Coding">Coding Club</option>
+    </select>
+  </div>
+
+  <!-- Section Label -->
+  <div class="section-label">
+    <div class="section-title">Events</div>
+    <span class="section-count" id="eventCount">11 events</span>
+  </div>
+
+  <!-- Grid -->
+  <div class="events-grid" id="eventsGrid"></div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: CLUB LOGIN
+═══════════════════════════════════ -->
+<div id="page-login">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-icon">🏛️</div>
+      <div class="login-title">Club Portal</div>
+      <div class="login-sub">Sign in to manage your club events</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Club Name</label>
+      <select class="form-input" id="loginClub">
+        <option value="">Select your club…</option>
+        <option value="NSS">NSS</option>
+        <option value="CSI">CSI</option>
+        <option value="Cultural">Cultural Committee</option>
+        <option value="Sports">Sports Club</option>
+        <option value="IEEE">IEEE</option>
+        <option value="Coding">Coding Club</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="loginPass" placeholder="Enter club password" value="pass123">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;font-size:15px;border-radius:12px;margin-top:8px;" onclick="doLogin()">
+      Sign In →
+    </button>
+    <div class="login-divider">or</div>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;padding:10px;border-radius:12px;" onclick="showPage('home')">← Back to Events</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: CLUB DASHBOARD
+═══════════════════════════════════ -->
+<div id="page-dashboard">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title" id="dashTitle">NSS Dashboard</div>
+      <div class="dash-sub">Manage your club events</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="dash-stats">
+    <div class="dash-stat">
+      <div class="dash-stat-label">Total Events</div>
+      <div class="dash-stat-value amber" id="dashTotal">0</div>
+    </div>
+    <div class="dash-stat">
+      <div class="dash-stat-label">Ongoing</div>
+      <div class="dash-stat-value green" id="dashOngoing">0</div>
+    </div>
+    <div class="dash-stat">
+      <div class="dash-stat-label">Upcoming</div>
+      <div class="dash-stat-value" id="dashUpcoming">0</div>
+    </div>
+    <div class="dash-stat">
+      <div class="dash-stat-label">Total RSVPs</div>
+      <div class="dash-stat-value amber" id="dashRsvp">0</div>
+    </div>
+  </div>
+
+  <!-- Post New Event Form -->
+  <div class="dash-section-title">➕ Post New Event</div>
+  <div class="post-form">
+    <div class="form-grid">
+      <div>
+        <label class="form-label">Event Title</label>
+        <input type="text" class="form-input" id="newTitle" placeholder="e.g. Annual Hackathon 2026">
+      </div>
+      <div>
+        <label class="form-label">Category</label>
+        <select class="form-input" id="newCat">
+          <option>Technical</option><option>Cultural</option><option>Sports</option>
+          <option>Workshop</option><option>Seminar</option><option>Competition</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="newDate">
+      </div>
+      <div>
+        <label class="form-label">Time</label>
+        <input type="time" class="form-input" id="newTime" value="10:00">
+      </div>
+      <div>
+        <label class="form-label">Venue</label>
+        <input type="text" class="form-input" id="newVenue" placeholder="e.g. Seminar Hall A">
+      </div>
+      <div>
+        <label class="form-label">Status</label>
+        <select class="form-input" id="newStatus">
+          <option value="upcoming">Upcoming</option>
+          <option value="ongoing">Ongoing</option>
+        </select>
+      </div>
+      <div class="full">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="newDesc" placeholder="Describe your event…"></textarea>
+      </div>
+      <div class="full">
+        <label class="form-label">Card Color</label>
+        <div class="color-pick" id="colorPick">
+          <div class="cp sel" data-color="bg1" style="background:linear-gradient(135deg,#1a3a5c,#0d6e9c)" onclick="pickColor(this)"></div>
+          <div class="cp" data-color="bg2" style="background:linear-gradient(135deg,#3a1a5c,#7b2fbe)" onclick="pickColor(this)"></div>
+          <div class="cp" data-color="bg3" style="background:linear-gradient(135deg,#5c1a1a,#c0392b)" onclick="pickColor(this)"></div>
+          <div class="cp" data-color="bg4" style="background:linear-gradient(135deg,#1a5c2a,#27ae60)" onclick="pickColor(this)"></div>
+          <div class="cp" data-color="bg5" style="background:linear-gradient(135deg,#5c4a1a,#d4a017)" onclick="pickColor(this)"></div>
+        </div>
+      </div>
+      <div class="full" style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="resetForm()">Clear</button>
+        <button class="btn btn-primary" onclick="postEvent()">Post Event →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Events Table -->
+  <div class="dash-section-title">📋 My Events</div>
+  <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:40px;">
+    <table class="event-table">
+      <thead>
+        <tr>
+          <th>Event</th><th>Date</th><th>Status</th><th>RSVPs</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="dashTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ EVENT DETAIL MODAL ═══ -->
+<div class="modal-backdrop" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-banner" id="modalBanner">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <span class="status-badge" id="modalBadge"></span>
+    </div>
+    <div class="modal-body">
+      <div class="modal-club" id="modalClub"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-info-grid">
+        <div class="info-box"><div class="info-box-label">📅 Date</div><div class="info-box-value" id="modalDate"></div></div>
+        <div class="info-box"><div class="info-box-label">🕐 Time</div><div class="info-box-value" id="modalTime"></div></div>
+        <div class="info-box"><div class="info-box-label">📍 Venue</div><div class="info-box-value" id="modalVenue"></div></div>
+        <div class="info-box"><div class="info-box-label">👥 RSVPs</div><div class="info-box-value" id="modalRsvp"></div></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-full" onclick="closeModalDirect()">🎫 RSVP Now</button>
+        <button class="btn btn-ghost btn-full" onclick="closeModalDirect()">Share Event</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="logic.js" ></script>
+</body>
+</html>
