@@ -1,134 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!--
-    ╔══════════════════════════════════════════════════════╗
-    ║   CampusConnect — College Event Management Portal   ║
-    ║   Sanjivani College of Engineering, Kopargaon       ║
-    ║   Built with: HTML5 · CSS3 · Vanilla JavaScript     ║
-    ╚══════════════════════════════════════════════════════╝
-
-    FILE STRUCTURE:
-    ├── <head>          → Page settings, Google Fonts, CSS link
-    ├── <body>
-    │   ├── Toast       → Small notification popup
-    │   ├── <nav>       → Top navigation bar
-    │   ├── page-home   → Main scrollable page (Events / Clubs / Calendar / About)
-    │   ├── page-dept-login   → Coordinator login form
-    │   ├── page-dashboard    → Coordinator dashboard (post events & clubs)
-    │   ├── page-about        → Full About page for the college
-    │   └── #modal            → Event detail popup (modal)
--->
-
 <head>
-    <!-- Character encoding and responsive viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Page title shown on the browser tab -->
-    <title>CampusConnect — Campus Events</title>
-
-    <!-- Google Fonts: Plus Jakarta Sans (headings) + Inter (body text) -->
+    <meta name="description"
+        content="CampusConnect — Your central hub for college events, clubs, calendars and campus info across every department.">
+    <title>CampusConnect — College Event Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
-
-    <!-- External CSS file for all visual styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <!-- TOAST -->
+    <div class="toast" id="toast">✓ <span id="toastMsg"></span></div>
 
-    <!-- ═══════════════════════════════════════
-         TOAST NOTIFICATION
-         A small popup bar shown at the bottom
-         when something is saved or deleted.
-         Logic.js controls when it appears.
-    ════════════════════════════════════════ -->
-    <div class="toast" id="toast">
-        ✓ <span id="toastMsg"></span>
-    </div>
-
-
-    <!-- ═══════════════════════════════════════
-         NAVIGATION BAR
-         Stays fixed at the top of the page.
-         Left  → Logo (click to go home)
-         Center → Nav links (scroll to sections)
-         Right  → Login / Logout button
-    ════════════════════════════════════════ -->
+    <!-- ═══ NAV ═══ -->
     <nav>
-        <!-- Logo — clicking it takes the user back to the home page -->
         <div class="nav-logo" onclick="goHome()">
             <div class="logo-mark">C</div>
             <span class="logo-text">Campus<span>Connect</span></span>
         </div>
-
-        <!-- Center navigation links — each scrolls to a section on the home page -->
         <div class="nav-center">
-            <button class="nav-link active" id="navEvents" onclick="navScrollTo('home-events',   this)">Events</button>
-            <button class="nav-link" id="navClubs" onclick="navScrollTo('home-clubs',    this)">Clubs</button>
-            <button class="nav-link" id="navCalendar" onclick="navScrollTo('home-calendar', this)">Calendar</button>
-            <button class="nav-link" id="navAbout" onclick="navScrollTo('home-about',    this)">About</button>
+            <a class="nav-link active" href="#section-events" onclick="setActiveNav(this)">Events</a>
+            <a class="nav-link" href="#section-clubs" onclick="setActiveNav(this)">Clubs</a>
+            <a class="nav-link" href="#section-calendar" onclick="setActiveNav(this)">Calendar</a>
+            <a class="nav-link" href="#section-about" onclick="setActiveNav(this)">About</a>
         </div>
-
-        <!-- Right side: Login / Logout buttons -->
         <div class="nav-right">
-            <!-- Sign Out button — hidden by default, shown after login -->
             <button id="navLogoutBtn" class="btn btn-ghost btn-sm" style="display:none" onclick="doLogout()">Sign
                 Out</button>
-
-            <!-- Coordinator Login button — always visible until logged in -->
             <button id="navLoginBtn" class="btn btn-ghost btn-sm" onclick="showPage('dept-login')">Coordinator
                 Login</button>
-
-            <!-- Register button (currently a placeholder) -->
             <button class="btn btn-primary btn-sm">🎫 Register</button>
         </div>
+        <!-- Mobile hamburger -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+            <span></span><span></span><span></span>
+        </button>
     </nav>
 
+    <!-- Mobile nav drawer -->
+    <div class="mobile-nav" id="mobileNav">
+        <a class="mobile-nav-link" href="#section-events" onclick="closeMobileMenu()">Events</a>
+        <a class="mobile-nav-link" href="#section-clubs" onclick="closeMobileMenu()">Clubs</a>
+        <a class="mobile-nav-link" href="#section-calendar" onclick="closeMobileMenu()">Calendar</a>
+        <a class="mobile-nav-link" href="#section-about" onclick="closeMobileMenu()">About</a>
+    </div>
 
-    <!-- ═══════════════════════════════════════════════════════════════
-         HOME PAGE  (id="page-home")
-         This is the main visible page.  It contains 4 sections:
-           1. Hero Banner      — welcome message + live stats
-           2. Events Section   — filterable event cards (filled by JS)
-           3. Clubs Section    — all student clubs (filled by JS)
-           4. Calendar Section — monthly calendar with event dates
-           5. About Teaser     — college summary with "Learn More" link
-    ════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════
+     HOME PAGE
+═══════════════════════ -->
     <div id="page-home" class="page active">
 
-
-        <!-- ───────────────────────────────────
-             HERO BANNER
-             Large welcoming section at the top.
-             Stats (upcoming, ongoing, clubs, depts)
-             are updated live by renderHome() in JS.
-        ─────────────────────────────────── -->
+        <!-- ──── HERO ──── -->
         <section class="hero">
-            <!-- Background glow decorations (pure CSS, visual only) -->
             <div class="hero-glow-a"></div>
             <div class="hero-glow-b"></div>
-
-            <!-- Small label above the heading -->
             <div class="eyebrow">
                 <div class="eyebrow-dot"></div>
                 Academic Year 2025–26
             </div>
-
-            <!-- Main heading -->
             <h1>Discover <em>Events</em><br>Across Every Department</h1>
-
-            <!-- Subtitle -->
-            <p class="hero-sub">
-                Your central hub for campus events — workshops, fests, competitions, seminars and more.
-                Organized by department.
-            </p>
-
-            <!-- Live statistics row — numbers are updated by logic.js -->
+            <p class="hero-sub">Your central hub for campus events — workshops, fests, competitions, seminars and more.
+                Organized by department.</p>
             <div class="hero-stats">
                 <div class="h-stat">
                     <div class="h-stat-num gold" id="stat-up">0<span>+</span></div>
@@ -146,320 +85,307 @@
                 </div>
                 <div class="h-divider"></div>
                 <div class="h-stat">
-                    <div class="h-stat-num" id="stat-depts">9</div>
+                    <div class="h-stat-num" id="stat-depts">8</div>
                     <div class="h-stat-label">Departments</div>
                 </div>
             </div>
         </section>
 
-
-        <!-- ───────────────────────────────────
-             FILTER BAR
-             Three controls in one row:
-             1. Department dropdown — filter events by dept
-             2. Search input        — filter by keyword
-             3. Status tabs         — All / Ongoing / Upcoming / Past
-        ─────────────────────────────────── -->
-        <div class="filter-bar">
-
-            <!-- Department dropdown (custom, populated by JS) -->
-            <div class="dept-dropdown-wrap">
-
-                <!-- The button that shows the currently selected department -->
-                <div class="dept-dropdown" id="deptDropdown" onclick="toggleDeptDropdown()">
-                    <span class="dd-dot" id="ddDot"></span>
-                    <span class="dd-label" id="ddLabel">All Departments</span>
-                    <!-- Down arrow icon (SVG) -->
-                    <svg class="dd-chevron" id="ddChevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.5">
-                        <path d="m6 9 6 6 6-6" />
-                    </svg>
-                </div>
-
-                <!-- The popup list of departments — JS appends all dept options here -->
-                <div class="dept-dropdown-menu" id="deptDropdownMenu">
-                    <!-- "All Departments" option (always shown) -->
-                    <div class="ddm-item active" data-dept="all"
-                        onclick="selectDept('all', 'All Departments', '', this)">
-                        <span class="ddm-dot" style="background:var(--gold)"></span>
-                        All Departments
+        <!-- ════════════════════════════════
+       SECTION: EVENTS
+  ════════════════════════════════ -->
+        <section id="section-events" class="home-section">
+            <div class="section-header-row">
+                <div class="section-header-left">
+                    <div class="section-icon">📅</div>
+                    <div>
+                        <h2 class="section-heading">Events</h2>
+                        <p class="section-subtitle">Explore upcoming, ongoing and past events across all departments</p>
                     </div>
-                    <!-- Other department items are added by renderDeptDropdown() in logic.js -->
                 </div>
             </div>
 
-            <!-- Search input — filters events as you type -->
-            <div class="search-wrap">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.35-4.35" />
-                </svg>
-                <input class="search-input" id="searchInput" type="text" placeholder="Search events, clubs…"
-                    oninput="renderHome()">
+            <!-- Department Dropdown + Search + Status Filters -->
+            <div class="filter-bar">
+                <div class="dept-dropdown-wrap" id="deptDropdownWrap">
+                    <button class="dept-dropdown-btn" id="deptDropdownBtn" onclick="toggleDeptDropdown()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <span id="deptDropdownLabel">All Departments</span>
+                        <svg class="dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="dept-dropdown-menu" id="deptDropdownMenu">
+                        <div class="dept-dropdown-item active" data-dept="all" onclick="selectDept(this, 'all')">
+                            <span>🏫</span> All Departments
+                        </div>
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="search-wrap">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input class="search-input" id="searchInput" type="text" placeholder="Search events, clubs…"
+                        oninput="renderEvents()">
+                </div>
+                <div class="status-tabs">
+                    <button class="stab active" data-s="all" onclick="setStatus(this)">All</button>
+                    <button class="stab" data-s="ongoing" onclick="setStatus(this)">🟢 Ongoing</button>
+                    <button class="stab" data-s="upcoming" onclick="setStatus(this)">🟡 Upcoming</button>
+                    <button class="stab" data-s="past" onclick="setStatus(this)">Past</button>
+                </div>
             </div>
 
-            <!-- Status filter tabs -->
-            <div class="status-tabs">
-                <button class="stab active" data-s="all" onclick="setStatus(this)">All</button>
-                <button class="stab" data-s="ongoing" onclick="setStatus(this)">🟢 Ongoing</button>
-                <button class="stab" data-s="upcoming" onclick="setStatus(this)">🟡 Upcoming</button>
-                <button class="stab" data-s="past" onclick="setStatus(this)">Past</button>
-            </div>
-        </div>
-
-
-        <!-- ───────────────────────────────────
-             EVENTS SECTION
-             The event cards grid is empty at first.
-             renderHome() in logic.js fills it with
-             event cards based on current filters.
-        ─────────────────────────────────── -->
-        <div id="home-events">
-            <!-- Section heading + event count badge -->
             <div class="section-bar">
-                <div class="section-title">🎯 Events</div>
+                <div class="section-title">Events</div>
                 <span class="section-count" id="evCount">0 events</span>
             </div>
 
-            <!-- Cards rendered dynamically by renderHome() in logic.js -->
             <div class="events-flex" id="evGrid"></div>
-        </div>
+        </section>
 
-
-        <!-- ───────────────────────────────────
-             CLUBS SECTION
-             All student clubs are listed here.
-             renderClubsHome() in logic.js fills
-             the #clubGrid div with club cards.
-        ─────────────────────────────────── -->
-        <div class="home-section" id="home-clubs">
-            <!-- Section heading -->
-            <div class="home-sec-hdr">
-                <div>
-                    <div class="home-sec-eyebrow">Student Life</div>
-                    <h2 class="home-sec-title">Active <em>Clubs</em> &amp; Societies</h2>
-                </div>
-                <span class="section-count" id="clubCount">0 clubs</span>
-            </div>
-
-            <!-- Club cards inserted here by renderClubsHome() in logic.js -->
-            <div class="clubs-home-grid" id="clubGrid"></div>
-        </div>
-
-
-        <!-- ───────────────────────────────────
-             CALENDAR SECTION
-             Shows a monthly calendar grid.
-             Days with events have colored dots.
-             Clicking a day opens that event.
-             renderCalendarHome() fills this section.
-        ─────────────────────────────────── -->
-        <div class="home-section" id="home-calendar">
-            <!-- Section heading -->
-            <div class="home-sec-hdr">
-                <div>
-                    <div class="home-sec-eyebrow">Schedule</div>
-                    <h2 class="home-sec-title">Events <em>Calendar</em></h2>
-                </div>
-                <!-- Current month/year label (e.g. "April 2026") -->
-                <span class="section-count" id="calMonthLabel"></span>
-            </div>
-
-            <!-- Two-column layout: calendar grid (left) + upcoming list (right) -->
-            <div class="calendar-layout">
-
-                <!-- Monthly calendar grid -->
-                <div class="cal-grid-wrap">
-                    <!-- Weekday header row -->
-                    <div class="cal-weekdays">
-                        <span>Sun</span>
-                        <span>Mon</span>
-                        <span>Tue</span>
-                        <span>Wed</span>
-                        <span>Thu</span>
-                        <span>Fri</span>
-                        <span>Sat</span>
+        <!-- ════════════════════════════════
+       SECTION: CLUBS
+  ════════════════════════════════ -->
+        <section id="section-clubs" class="home-section">
+            <div class="section-header-row">
+                <div class="section-header-left">
+                    <div class="section-icon">🏛️</div>
+                    <div>
+                        <h2 class="section-heading">Clubs</h2>
+                        <p class="section-subtitle">Student organizations driving innovation, culture and community</p>
                     </div>
-                    <!-- Day cells filled by renderCalendarHome() in logic.js -->
-                    <div class="cal-days" id="calDays"></div>
                 </div>
-
-                <!-- Upcoming events list (sidebar next to calendar) -->
-                <div class="cal-upcoming" id="calUpcoming"></div>
             </div>
-        </div>
+            <div class="clubs-grid" id="clubsGrid"></div>
+        </section>
 
-
-        <!-- ───────────────────────────────────
-             ABOUT TEASER SECTION
-             A compact summary of the college.
-             Left side: text, stats, CTA button.
-             Right side: list of all departments.
-        ─────────────────────────────────── -->
-        <div class="home-section" id="home-about">
-            <div class="about-teaser-card">
-
-                <!-- Decorative golden glow (visual only) -->
-                <div class="atc-glow"></div>
-
-                <!-- Left column: college info -->
-                <div class="atc-left">
-                    <div class="home-sec-eyebrow">About Us</div>
-                    <h2 class="atc-title">Sanjivani College<br>of <em>Engineering</em></h2>
-                    <p class="atc-sub">
-                        Est. 1984 · NAAC A+ · NBA Accredited · Autonomous Institute affiliated to
-                        Savitribai Phule Pune University, Kopargaon, Maharashtra.
-                    </p>
-
-                    <!-- Quick stat pills -->
-                    <div class="atc-pills">
-                        <div class="atc-pill">
-                            <span class="atp-num gold">40+</span>
-                            <span class="atp-label">Years</span>
-                        </div>
-                        <div class="atc-pill">
-                            <span class="atp-num jade">9</span>
-                            <span class="atp-label">Depts</span>
-                        </div>
-                        <div class="atc-pill">
-                            <span class="atp-num sky">5000+</span>
-                            <span class="atp-label">Students</span>
-                        </div>
-                        <div class="atc-pill">
-                            <span class="atp-num">50+</span>
-                            <span class="atp-label">Clubs</span>
-                        </div>
+        <!-- ════════════════════════════════
+       SECTION: CALENDAR
+  ════════════════════════════════ -->
+        <section id="section-calendar" class="home-section">
+            <div class="section-header-row">
+                <div class="section-header-left">
+                    <div class="section-icon">🗓️</div>
+                    <div>
+                        <h2 class="section-heading">Calendar</h2>
+                        <p class="section-subtitle">View all events at a glance — plan your week ahead</p>
                     </div>
-
-                    <!-- Button to open the full About page -->
-                    <button class="btn btn-primary" onclick="showPage('about')" style="margin-top:8px">
-                        Explore About Page →
+                </div>
+                <div class="calendar-nav">
+                    <button class="cal-nav-btn" onclick="changeMonth(-1)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                    </button>
+                    <span class="cal-month-label" id="calMonthLabel"></span>
+                    <button class="cal-nav-btn" onclick="changeMonth(1)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="m9 18 6-6-6-6" />
+                        </svg>
                     </button>
                 </div>
+            </div>
+            <div class="calendar-wrap">
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+            <div class="cal-legend">
+                <span class="cal-legend-item"><span class="cal-dot cal-dot-ongoing"></span> Ongoing</span>
+                <span class="cal-legend-item"><span class="cal-dot cal-dot-upcoming"></span> Upcoming</span>
+                <span class="cal-legend-item"><span class="cal-dot cal-dot-past"></span> Past</span>
+            </div>
+        </section>
 
-                <!-- Right column: department list with color dots -->
-                <!-- --dc is a CSS custom property (variable) for each dept color -->
-                <div class="atc-dept-list">
-                    <div class="atc-dept-item" style="--dc:#4B9FE8">
-                        <div class="atc-dept-dot"></div><span>Computer Science &amp; Engineering</span>
+        <!-- ════════════════════════════════
+       SECTION: ABOUT
+  ════════════════════════════════ -->
+        <section id="section-about" class="home-section about-section">
+            <div class="section-header-row">
+                <div class="section-header-left">
+                    <div class="section-icon">ℹ️</div>
+                    <div>
+                        <h2 class="section-heading">About CampusConnect</h2>
+                        <p class="section-subtitle">Learn more about our platform, institution and how to reach us</p>
                     </div>
-                    <div class="atc-dept-item" style="--dc:#7027d4">
-                        <div class="atc-dept-dot"></div><span>Information Technology</span>
+                </div>
+            </div>
+
+            <div class="about-grid">
+                <!-- Info Cards -->
+                <div class="about-col">
+                    <div class="about-card">
+                        <div class="about-card-icon">🎯</div>
+                        <h3>Our Mission</h3>
+                        <p>CampusConnect bridges the gap between departments and students by providing a unified
+                            platform for all campus events. We aim to make event discovery seamless and encourage
+                            cross-department collaboration and participation.</p>
                     </div>
-                    <div class="atc-dept-item" style="--dc:#2DD4A0">
-                        <div class="atc-dept-dot"></div><span>Electronics &amp; Computer Engg.</span>
+                    <div class="about-card">
+                        <div class="about-card-icon">🏫</div>
+                        <h3>The Institution</h3>
+                        <p>Our college is a premier institution offering programs in Computer Science, Information
+                            Technology, Electronics, Mechanical, Electrical, Mechatronics, Structural, and Civil
+                            Engineering. With a vibrant community of 5,000+ students and 8 departments, innovation
+                            thrives here every day.</p>
                     </div>
-                    <div class="atc-dept-item" style="--dc:#E8546A">
-                        <div class="atc-dept-dot"></div><span>Mechanical Engineering</span>
+                    <div class="about-card">
+                        <div class="about-card-icon">⚡</div>
+                        <h3>Platform Features</h3>
+                        <ul class="about-features-list">
+                            <li>Real-time event tracking & RSVP system</li>
+                            <li>Department-specific coordinator dashboards</li>
+                            <li>Club creation & management tools</li>
+                            <li>Interactive calendar with event highlights</li>
+                            <li>Cross-department event discovery</li>
+                        </ul>
                     </div>
-                    <div class="atc-dept-item" style="--dc:#E8B84B">
-                        <div class="atc-dept-dot"></div><span>Electrical Engineering</span>
-                    </div>
-                    <div class="atc-dept-item" style="--dc:#18ae5c">
-                        <div class="atc-dept-dot"></div><span>Mechatronics Engineering</span>
-                    </div>
-                    <div class="atc-dept-item" style="--dc:#c48518">
-                        <div class="atc-dept-dot"></div><span>Structural Engineering</span>
-                    </div>
-                    <div class="atc-dept-item" style="--dc:#0d97b8">
-                        <div class="atc-dept-dot"></div><span>Civil Engineering</span>
-                    </div>
-                    <div class="atc-dept-item" style="--dc:#9b18cc">
-                        <div class="atc-dept-dot"></div><span>Student Activity Council</span>
+                    <div class="about-card">
+                        <div class="about-card-icon">📞</div>
+                        <h3>Contact Us</h3>
+                        <div class="contact-grid">
+                            <div class="contact-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                                <span>events@campusconnect.edu</span>
+                            </div>
+                            <div class="contact-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                                </svg>
+                                <span>+91 90000 12345</span>
+                            </div>
+                            <div class="contact-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                                    <circle cx="12" cy="9" r="2.5" />
+                                </svg>
+                                <span>101 College Road, Pune, Maharashtra, India 411001</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Map -->
+                <div class="about-col about-map-col">
+                    <div class="about-map-card">
+                        <div class="about-map-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                                <circle cx="12" cy="9" r="2.5" />
+                            </svg>
+                            Campus Location
+                        </div>
+                        <div class="map-container">
+                            <iframe id="campusMap"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.065343414441!2d73.85674421531788!3d18.52043088741937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c065e1cce781%3A0x817e26cdb8742e08!2sPune%2C%20Maharashtra%2C%20India!5e0!3m2!1sen!2sin!4v1680000000000!5m2!1sen!2sin"
+                                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+                    <div class="about-quick-stats">
+                        <div class="about-stat-card">
+                            <div class="about-stat-num">5000+</div>
+                            <div class="about-stat-label">Students</div>
+                        </div>
+                        <div class="about-stat-card">
+                            <div class="about-stat-num">8</div>
+                            <div class="about-stat-label">Departments</div>
+                        </div>
+                        <div class="about-stat-card">
+                            <div class="about-stat-num">50+</div>
+                            <div class="about-stat-label">Annual Events</div>
+                        </div>
+                        <div class="about-stat-card">
+                            <div class="about-stat-num">20+</div>
+                            <div class="about-stat-label">Active Clubs</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
 
+        <!-- ──── FOOTER ──── -->
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <div class="nav-logo">
+                        <div class="logo-mark">C</div>
+                        <span class="logo-text">Campus<span>Connect</span></span>
+                    </div>
+                    <p class="footer-tagline">Your central hub for campus events.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#section-events">Events</a>
+                    <a href="#section-clubs">Clubs</a>
+                    <a href="#section-calendar">Calendar</a>
+                    <a href="#section-about">About</a>
+                </div>
+                <div class="footer-copy">© 2026 CampusConnect. All rights reserved.</div>
+            </div>
+        </footer>
     </div>
-    <!-- End: page-home -->
 
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         COORDINATOR LOGIN PAGE  (id="page-dept-login")
-         Hidden by default. Shown when "Coordinator Login" is clicked.
-         Contains: department dropdown, coordinator ID, password fields.
-         doLogin() in logic.js handles the form submission.
-    ════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════
+     COORDINATOR LOGIN
+═══════════════════════ -->
     <div id="page-dept-login" class="page">
         <div class="login-card">
-
-            <!-- Login card header -->
             <div class="login-top">
                 <div class="login-icon">🎓</div>
                 <div class="login-title">Coordinator Portal</div>
-                <div class="login-sub">Sign in to manage your department's clubs &amp; events</div>
+                <div class="login-sub">Sign in to manage your department's clubs & events</div>
             </div>
-
-            <!-- Login form fields -->
             <div class="form-stack">
-                <!-- Department selector -->
                 <div class="form-group">
                     <label class="form-label">Department</label>
                     <select class="form-input" id="loginDept">
                         <option value="">Select your department…</option>
-                        <option value="cs">Computer Department</option>
-                        <option value="it">Information Technology</option>
-                        <option value="ece">Electronics &amp; Computer Engineering</option>
-                        <option value="me">Mechanical Department</option>
-                        <option value="ee">Electrical Department</option>
-                        <option value="mx">Mechatronics Department</option>
-                        <option value="st">Structural Department</option>
-                        <option value="cv">Civil Department</option>
-                        <option value="sac">Student Activity Council</option>
                     </select>
                 </div>
-
-                <!-- Coordinator ID input -->
                 <div class="form-group">
                     <label class="form-label">Coordinator ID</label>
                     <input class="form-input" type="text" id="loginId" placeholder="e.g. COORD-CS-01">
                 </div>
-
-                <!-- Password input -->
                 <div class="form-group">
                     <label class="form-label">Password</label>
                     <input class="form-input" type="password" id="loginPass" placeholder="Enter your password">
                 </div>
-
-                <!-- Submit button — calls doLogin() in logic.js -->
-                <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:4px">
-                    Sign In →
-                </button>
+                <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:4px">Sign In →</button>
             </div>
-
-            <!-- Divider line -->
             <div class="divider">or</div>
-
-            <!-- Back button — returns to home page -->
             <button class="btn btn-ghost btn-full" onclick="goHome()">← Back to Events</button>
-
-            <!-- Help text -->
             <div class="login-hint">
                 Each department has one designated coordinator.<br>
                 Contact the admin if you need access credentials.
             </div>
         </div>
     </div>
-    <!-- End: page-dept-login -->
 
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         COORDINATOR DASHBOARD  (id="page-dashboard")
-         Shown after a successful coordinator login.
-         Contains:
-           - KPI cards (total clubs, events, ongoing, upcoming, RSVPs)
-           - Tabs: Clubs tab | Events tab
-           - Clubs tab: form to create a new club + list of existing clubs
-           - Events tab: form to post a new event + table of existing events
-    ════════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════
+     COORDINATOR DASHBOARD
+═══════════════════════ -->
     <div id="page-dashboard" class="page">
 
-        <!-- Dashboard header with title and sign-out button -->
         <div class="dash-header">
-            <div>
-                <div style="display:flex; align-items:center; gap:10px;">
+            <div class="flex-col" style="gap:6px">
+                <div class="flex" style="align-items:center;gap:10px">
                     <div class="dash-title" id="dashTitle">Dashboard</div>
                     <div class="dash-dept-tag" id="dashDeptTag"></div>
                 </div>
@@ -468,7 +394,7 @@
             <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
         </div>
 
-        <!-- KPI Summary Cards — numbers filled by renderDashboard() in logic.js -->
+        <!-- KPIs -->
         <div class="kpi-row">
             <div class="kpi">
                 <div class="kpi-label">Total Clubs</div>
@@ -492,31 +418,21 @@
             </div>
         </div>
 
-        <!-- Tab buttons to switch between Clubs panel and Events panel -->
+        <!-- Dashboard tabs -->
         <div class="dash-tabs">
-            <button class="dtab active" onclick="setDTab(this, 'clubs')">🏛️ Clubs</button>
-            <button class="dtab" onclick="setDTab(this, 'events')">📅 Events</button>
+            <button class="dtab active" onclick="setDTab(this,'clubs')">🏛️ Clubs</button>
+            <button class="dtab" onclick="setDTab(this,'events')">📅 Events</button>
         </div>
 
-
-        <!-- ─────────────────────────────────
-             CLUBS PANEL  (default visible tab)
-             Two parts:
-             1. Form to create a new club
-             2. List of existing dept clubs
-        ──────────────────────────────── -->
+        <!-- CLUBS panel -->
         <div id="dpanel-clubs">
-
-            <!-- Section: Create New Club -->
             <div class="sec-h">➕ Create New Club</div>
             <div class="form-card">
                 <div class="form-row">
-                    <!-- Club name -->
                     <div class="form-group">
                         <label class="form-label">Club Name</label>
                         <input class="form-input" id="nClubName" type="text" placeholder="e.g. Robotics Club">
                     </div>
-                    <!-- Club category -->
                     <div class="form-group">
                         <label class="form-label">Category</label>
                         <select class="form-input" id="nClubCat">
@@ -528,40 +444,26 @@
                             <option>Arts</option>
                         </select>
                     </div>
-                    <!-- Club description (spans full row width) -->
                     <div class="form-group full">
                         <label class="form-label">Description</label>
                         <textarea class="form-textarea" id="nClubDesc"
                             placeholder="Brief description of the club…"></textarea>
                     </div>
                 </div>
-
-                <!-- Form action buttons -->
-                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <div class="flex-end" style="gap:8px">
                     <button class="btn btn-ghost" onclick="clearClubForm()">Clear</button>
                     <button class="btn btn-primary" onclick="createClub()">Create Club →</button>
                 </div>
             </div>
 
-            <!-- Section: List of department's clubs (filled by JS) -->
             <div class="sec-h">🏛️ Department Clubs</div>
             <div class="club-list" id="dClubList"></div>
         </div>
 
-
-        <!-- ─────────────────────────────────
-             EVENTS PANEL  (hidden by default)
-             Two parts:
-             1. Form to post a new event
-             2. Table of existing dept events
-        ──────────────────────────────── -->
+        <!-- EVENTS panel -->
         <div id="dpanel-events" style="display:none">
-
-            <!-- Section: Post New Event -->
             <div class="sec-h">➕ Post New Event</div>
             <div class="form-card">
-
-                <!-- Row 1: Event title + Club selector -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Event Title</label>
@@ -569,12 +471,9 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Club</label>
-                        <!-- Filled by JS with clubs belonging to logged-in coordinator's dept -->
                         <select class="form-input" id="nEvClub"></select>
                     </div>
                 </div>
-
-                <!-- Row 2: Date / Time / Venue / Status -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Date</label>
@@ -596,18 +495,13 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Row 3: Description (full width) -->
                 <div class="form-row">
                     <div class="form-group full">
                         <label class="form-label">Description</label>
                         <textarea class="form-textarea" id="nEvDesc" placeholder="Describe the event…"></textarea>
                     </div>
                 </div>
-
-                <!-- Row 4: Card color picker + Action buttons -->
-                <div class="form-row" style="align-items:center; margin-bottom:0">
-                    <!-- Color swatches to choose event card banner color -->
+                <div class="form-row" style="align-items:center;margin-bottom:0">
                     <div class="form-group" style="flex:1">
                         <label class="form-label">Card Color</label>
                         <div class="color-row" id="colorPick">
@@ -621,15 +515,13 @@
                             <div class="cp g8" data-c="g8" onclick="pickColor(this)"></div>
                         </div>
                     </div>
-                    <!-- Form action buttons -->
-                    <div style="display:flex; justify-content:flex-end; gap:8px; padding-top:20px">
+                    <div class="flex-end" style="gap:8px;padding-top:20px">
                         <button class="btn btn-ghost" onclick="clearEvForm()">Clear</button>
                         <button class="btn btn-primary" onclick="postEvent()">Post Event →</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Section: Events table for this department (filled by JS) -->
             <div class="sec-h">📋 Department Events</div>
             <div class="etable-wrap">
                 <table class="etable">
@@ -643,524 +535,30 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <!-- Rows filled by renderDashboard() in logic.js -->
                     <tbody id="dEvTable"></tbody>
                 </table>
             </div>
         </div>
-
     </div>
-    <!-- End: page-dashboard -->
 
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         ABOUT PAGE  (id="page-about")
-         A dedicated full page about Sanjivani College of Engineering.
-         Sections:
-           1. Hero        — college title, badges, image strip
-           2. Stats       — key numbers (years, students, faculty…)
-           3. Mission / Vision / Core Values
-           4. Departments — 9 dept cards with short descriptions
-           5. Campus Life — 4 highlight cards
-           6. Contact     — address, phone, email + SVG map
-           7. Footer
-    ════════════════════════════════════════════════════════════════ -->
-    <div id="page-about" class="page">
-
-
-        <!-- ─────────────────────────────────
-             ABOUT HERO
-             Top section with college name,
-             accreditation badges, and
-             an image strip of campus photos.
-        ──────────────────────────────── -->
-        <section class="about-hero">
-            <!-- Background glow decorations (visual) -->
-            <div class="about-glow-a"></div>
-            <div class="about-glow-b"></div>
-
-            <!-- Back button to return to home page -->
-            <div class="about-back">
-                <button class="btn btn-ghost btn-sm" onclick="goHome()">← Back to Events</button>
-            </div>
-
-            <!-- Hero text content -->
-            <div class="about-hero-inner">
-                <div class="eyebrow">
-                    <div class="eyebrow-dot"></div>
-                    Est. 1984 · Kopargaon, Maharashtra
-                </div>
-                <h1 class="about-h1">Sanjivani College<br>of <em>Engineering</em></h1>
-                <p class="about-hero-sub">
-                    A premier autonomous engineering institution affiliated to Savitribai Phule Pune University,
-                    committed to excellence in technical education, research, and innovation.
-                </p>
-                <!-- Accreditation badges -->
-                <div class="about-badges">
-                    <div class="about-badge">🏆 NAAC A+ Accredited</div>
-                    <div class="about-badge">🎓 NBA Accredited</div>
-                    <div class="about-badge">🏛️ Autonomous Institute</div>
-                    <div class="about-badge">🔬 Research Centre</div>
-                </div>
-            </div>
-
-            <!-- Campus photo strip (4 image cards) -->
-            <div class="about-img-strip">
-                <div class="about-img-card ai1">
-                    <div class="ai-overlay"></div>
-                    <div class="ai-label">Main Building</div>
-                </div>
-                <div class="about-img-card ai2">
-                    <div class="ai-overlay"></div>
-                    <div class="ai-label">CS Lab</div>
-                </div>
-                <div class="about-img-card ai3">
-                    <div class="ai-overlay"></div>
-                    <div class="ai-label">Auditorium</div>
-                </div>
-                <div class="about-img-card ai4">
-                    <div class="ai-overlay"></div>
-                    <div class="ai-label">Library</div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- ─────────────────────────────────
-             STATS SECTION
-             Five key numbers about the college
-             shown in a horizontal strip.
-        ──────────────────────────────── -->
-        <section class="about-stats-section">
-            <div class="about-stats-grid">
-                <div class="about-stat-item">
-                    <div class="about-stat-num gold">40<span>+</span></div>
-                    <div class="about-stat-label">Years of Excellence</div>
-                </div>
-                <div class="about-stat-sep"></div>
-                <div class="about-stat-item">
-                    <div class="about-stat-num jade">9</div>
-                    <div class="about-stat-label">Departments</div>
-                </div>
-                <div class="about-stat-sep"></div>
-                <div class="about-stat-item">
-                    <div class="about-stat-num sky">5000<span>+</span></div>
-                    <div class="about-stat-label">Students Enrolled</div>
-                </div>
-                <div class="about-stat-sep"></div>
-                <div class="about-stat-item">
-                    <div class="about-stat-num gold">300<span>+</span></div>
-                    <div class="about-stat-label">Faculty Members</div>
-                </div>
-                <div class="about-stat-sep"></div>
-                <div class="about-stat-item">
-                    <div class="about-stat-num jade">50<span>+</span></div>
-                    <div class="about-stat-label">Active Student Clubs</div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- ─────────────────────────────────
-             ABOUT CONTENT SECTION
-             Contains:
-             - Mission / Vision / Core Values cards
-             - Departments grid (9 departments)
-             - Campus Life highlights
-             - Contact & Location with SVG map
-        ──────────────────────────────── -->
-        <section class="about-content">
-
-            <!-- Mission, Vision, Core Values — 3 cards in a row -->
-            <div class="about-mv-grid">
-                <div class="about-mv-card">
-                    <div class="about-mv-icon">🎯</div>
-                    <div class="about-mv-title">Our Mission</div>
-                    <p class="about-mv-text">
-                        To impart quality technical education by fostering innovation, ethical values, and
-                        research-driven learning — empowering students to become industry-ready engineers
-                        and leaders of tomorrow.
-                    </p>
-                </div>
-                <div class="about-mv-card">
-                    <div class="about-mv-icon">🔭</div>
-                    <div class="about-mv-title">Our Vision</div>
-                    <p class="about-mv-text">
-                        To be a globally recognized institution of academic excellence, producing technically
-                        competent, socially responsible, and entrepreneurially oriented graduates who
-                        contribute to the nation's growth.
-                    </p>
-                </div>
-                <div class="about-mv-card">
-                    <div class="about-mv-icon">💡</div>
-                    <div class="about-mv-title">Core Values</div>
-                    <p class="about-mv-text">
-                        Integrity, Innovation, Inclusivity and Impact — the four pillars that guide every
-                        academic program, student activity, and institutional initiative at SCE.
-                    </p>
-                </div>
-            </div>
-
-
-            <!-- Departments Grid — 9 cards, one per department -->
-            <div class="about-section-hdr">
-                <div class="about-section-label">Departments</div>
-                <h2 class="about-section-title">9 Centres of <em>Engineering Excellence</em></h2>
-            </div>
-
-            <!-- Each card uses --dc (CSS variable) for its accent color -->
-            <div class="about-dept-grid">
-                <div class="about-dept-card" style="--dc:#4B9FE8">
-                    <div class="adc-short">CS</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Computer Science &amp; Engineering</div>
-                        <div class="adc-desc">AI, ML, Cybersecurity, Full-Stack Development &amp; more.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#7027d4">
-                    <div class="adc-short">IT</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Information Technology</div>
-                        <div class="adc-desc">Cloud computing, Networking, Data Engineering &amp; DevOps.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#2DD4A0">
-                    <div class="adc-short">ECE</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Electronics &amp; Computer Engg.</div>
-                        <div class="adc-desc">Embedded systems, VLSI, IoT &amp; Signal Processing.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#E8546A">
-                    <div class="adc-short">ME</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Mechanical Engineering</div>
-                        <div class="adc-desc">CAD/CAM, Thermal, Robotics &amp; Manufacturing.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#E8B84B">
-                    <div class="adc-short">EE</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Electrical Engineering</div>
-                        <div class="adc-desc">Power systems, Control, Smart grids &amp; Renewables.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#18ae5c">
-                    <div class="adc-short">MX</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Mechatronics Engineering</div>
-                        <div class="adc-desc">Automation, Robotics, CNC &amp; Intelligent Systems.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#c48518">
-                    <div class="adc-short">ST</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Structural Engineering</div>
-                        <div class="adc-desc">Advanced structures, Seismic analysis &amp; FEM.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#0d97b8">
-                    <div class="adc-short">CV</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Civil Engineering</div>
-                        <div class="adc-desc">Construction, Environmental, Transportation &amp; Geo-tech.</div>
-                    </div>
-                </div>
-                <div class="about-dept-card" style="--dc:#9b18cc">
-                    <div class="adc-short">SAC</div>
-                    <div class="adc-info">
-                        <div class="adc-name">Student Activity Council</div>
-                        <div class="adc-desc">Cultural fests, Sports, NSS, NCC &amp; inter-college events.</div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Campus Life — 4 highlight cards -->
-            <div class="about-section-hdr">
-                <div class="about-section-label">Campus Life</div>
-                <h2 class="about-section-title">Beyond the <em>Classroom</em></h2>
-            </div>
-
-            <div class="about-life-grid">
-                <div class="about-life-card">
-                    <div class="alc-icon">🏆</div>
-                    <div class="alc-title">Competitions &amp; Fests</div>
-                    <p class="alc-desc">
-                        Annual flagship events like <strong>Technosanjivani</strong> (technical fest) and
-                        <strong>Tarang</strong> (cultural fest) draw participants from colleges across Maharashtra.
-                    </p>
-                </div>
-                <div class="about-life-card">
-                    <div class="alc-icon">🤝</div>
-                    <div class="alc-title">Industry Connect</div>
-                    <p class="alc-desc">
-                        Strong ties with 200+ companies for internships, placements, and live project
-                        collaborations through a dedicated Training &amp; Placement cell.
-                    </p>
-                </div>
-                <div class="about-life-card">
-                    <div class="alc-icon">🔬</div>
-                    <div class="alc-title">Research &amp; Innovation</div>
-                    <p class="alc-desc">
-                        State-of-the-art research labs, an Innovation Hub, and dedicated funding for student
-                        projects and patents — fostering the next generation of inventors.
-                    </p>
-                </div>
-                <div class="about-life-card">
-                    <div class="alc-icon">⚽</div>
-                    <div class="alc-title">Sports &amp; Wellness</div>
-                    <p class="alc-desc">
-                        Sprawling sports complex with cricket ground, basketball courts, gymnasium and an
-                        active sports committee promoting athlete excellence.
-                    </p>
-                </div>
-            </div>
-
-
-            <!-- Contact & Location — address details + SVG map -->
-            <div class="about-contact-card">
-
-                <!-- Left: contact info -->
-                <div class="about-contact-left">
-                    <div class="about-section-label" style="margin-bottom:10px">Contact &amp; Location</div>
-                    <h3 class="about-contact-title">Find Us on Campus</h3>
-
-                    <div class="about-contact-items">
-                        <!-- Address -->
-                        <div class="about-contact-item">
-                            <div class="aci-icon">📍</div>
-                            <div>
-                                <div class="aci-label">Address</div>
-                                <div class="aci-val">
-                                    At &amp; Post Sahajanandnagar, Kopargaon — 423603,<br>
-                                    Dist. Ahmednagar, Maharashtra, India
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Phone -->
-                        <div class="about-contact-item">
-                            <div class="aci-icon">📞</div>
-                            <div>
-                                <div class="aci-label">Phone</div>
-                                <div class="aci-val">+91 9130191301</div>
-                            </div>
-                        </div>
-                        <!-- Email -->
-                        <div class="about-contact-item">
-                            <div class="aci-icon">✉️</div>
-                            <div>
-                                <div class="aci-label">Email</div>
-                                <div class="aci-val">contact@sanjivani.org.in</div>
-                            </div>
-                        </div>
-                        <!-- Website -->
-                        <div class="about-contact-item">
-                            <div class="aci-icon">🌐</div>
-                            <div>
-                                <div class="aci-label">Website</div>
-                                <div class="aci-val">https://sanjivanicoe.org.in/</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CTA button -->
-                    <button class="btn btn-primary" onclick="goHome()" style="margin-top:24px">
-                        🎫 Explore Events →
-                    </button>
-                </div>
-
-                <!-- Right: CSS/SVG map illustration of Kopargaon area -->
-                <div class="about-contact-map">
-
-                    <!--
-                        SVG MAP — drawn entirely with SVG shapes.
-                        No external map API or internet connection needed.
-                        Layers (bottom to top):
-                          1. Green terrain background
-                          2. River path (wavy blue line)
-                          3. Roads: highway / secondary / tertiary
-                          4. Building blocks
-                          5. College campus block (highlighted in teal)
-                          6. Compass rose + scale bar
-                          7. Animated location pin with pulse rings
-                    -->
-                    <svg class="map-svg" viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg">
-
-                        <!-- Layer 1: Green terrain base -->
-                        <rect width="420" height="280" fill="#1a3528" />
-                        <!-- Slightly different green patches (fields) -->
-                        <rect x="30" y="20" width="90" height="60" rx="3" fill="#1f4030" opacity="0.8" />
-                        <rect x="140" y="10" width="70" height="45" rx="3" fill="#1f4030" opacity="0.7" />
-                        <rect x="290" y="30" width="100" height="55" rx="3" fill="#1f4030" opacity="0.8" />
-                        <rect x="10" y="130" width="80" height="70" rx="3" fill="#1f4030" opacity="0.7" />
-                        <rect x="330" y="150" width="80" height="90" rx="3" fill="#1f4030" opacity="0.7" />
-                        <rect x="60" y="220" width="120" height="50" rx="3" fill="#1f4030" opacity="0.6" />
-                        <rect x="260" y="210" width="100" height="60" rx="3" fill="#1f4030" opacity="0.6" />
-
-                        <!-- Layer 2: River (wavy blue path — represents Godavari river) -->
-                        <path d="M0 190 Q60 180 120 195 Q180 210 240 200 Q300 188 360 198 Q390 203 420 196"
-                            stroke="#1a4a6e" stroke-width="14" fill="none" opacity="0.9" />
-                        <path d="M0 190 Q60 180 120 195 Q180 210 240 200 Q300 188 360 198 Q390 203 420 196"
-                            stroke="#1e5a80" stroke-width="9" fill="none" opacity="0.7" />
-
-                        <!-- Layer 3a: Main highway (horizontal) — NH 160 -->
-                        <path d="M0 140 H420" stroke="#3a3a2e" stroke-width="14" fill="none" />
-                        <path d="M0 140 H420" stroke="#4a4a3a" stroke-width="10" fill="none" />
-                        <!-- Dashed center line on highway -->
-                        <path d="M0 140 H420" stroke="#555545" stroke-width="1" fill="none" stroke-dasharray="20,14" />
-
-                        <!-- Layer 3b: Main road (vertical) -->
-                        <path d="M210 0 V280" stroke="#3a3a2e" stroke-width="12" fill="none" />
-                        <path d="M210 0 V280" stroke="#4a4a3a" stroke-width="8" fill="none" />
-
-                        <!-- Layer 3c: Secondary roads -->
-                        <path d="M100 0   V140" stroke="#2e3028" stroke-width="7" fill="none" />
-                        <path d="M320 0   V140" stroke="#2e3028" stroke-width="7" fill="none" />
-                        <path d="M0   70  H210" stroke="#2e3028" stroke-width="6" fill="none" />
-                        <path d="M210 70  H420" stroke="#2e3028" stroke-width="5" fill="none" />
-                        <path d="M100 140 H210" stroke="#2e3028" stroke-width="5" fill="none" />
-                        <path d="M210 140 V190" stroke="#2e3028" stroke-width="6" fill="none" />
-
-                        <!-- Layer 3d: Minor / tertiary roads -->
-                        <path d="M50  70  V140" stroke="#292c25" stroke-width="4" fill="none" />
-                        <path d="M160 70  V140" stroke="#292c25" stroke-width="4" fill="none" />
-                        <path d="M270 0   V70" stroke="#292c25" stroke-width="4" fill="none" />
-                        <path d="M370 70  V140" stroke="#292c25" stroke-width="4" fill="none" />
-                        <path d="M0   105 H100" stroke="#292c25" stroke-width="3" fill="none" />
-                        <path d="M320 70  H420" stroke="#292c25" stroke-width="3" fill="none" />
-                        <path d="M320 105 H420" stroke="#292c25" stroke-width="3" fill="none" />
-
-                        <!-- Layer 4: Building blocks (grey rectangles in street grid) -->
-                        <rect x="108" y="78" width="44" height="28" rx="2" fill="#263830" opacity="0.9" />
-                        <rect x="120" y="84" width="10" height="8" rx="1" fill="#1a7a4a" opacity="0.5" />
-                        <rect x="134" y="84" width="10" height="8" rx="1" fill="#1a7a4a" opacity="0.5" />
-                        <rect x="166" y="78" width="36" height="28" rx="2" fill="#263830" opacity="0.9" />
-                        <rect x="58" y="78" width="34" height="28" rx="2" fill="#263830" opacity="0.9" />
-                        <rect x="220" y="78" width="42" height="28" rx="2" fill="#263830" opacity="0.9" />
-                        <rect x="270" y="78" width="42" height="28" rx="2" fill="#263830" opacity="0.9" />
-                        <rect x="330" y="78" width="36" height="24" rx="2" fill="#263830" opacity="0.9" />
-                        <rect x="374" y="78" width="36" height="24" rx="2" fill="#263830" opacity="0.9" />
-
-                        <!-- Layer 5: College campus block (highlighted in teal/green) -->
-                        <rect x="165" y="148" width="38" height="30" rx="3" fill="#2a5c3e" opacity="0.95" />
-                        <rect x="170" y="153" width="28" height="20" rx="2" fill="#1a7a4a" opacity="0.6" />
-                        <rect x="180" y="157" width="8" height="12" rx="1" fill="#22aa66" opacity="0.5" />
-
-                        <!-- Road label text -->
-                        <text x="212" y="137" font-size="5" fill="#888877" font-family="sans-serif" opacity="0.7">NH
-                            160</text>
-
-                        <!-- Layer 6a: Compass rose (top-right corner) -->
-                        <g transform="translate(390,22)">
-                            <circle cx="0" cy="0" r="12" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.12)"
-                                stroke-width="0.8" />
-                            <text x="0" y="-5" text-anchor="middle" font-size="6" fill="#ccc" font-family="sans-serif"
-                                font-weight="bold">N</text>
-                            <!-- North arrow (gold) -->
-                            <polygon points="0,-9 2,-2 0,0 -2,-2" fill="#e8b84b" />
-                            <!-- South arrow (grey) -->
-                            <polygon points="0,9 2,2 0,0 -2,2" fill="#666" />
-                        </g>
-
-                        <!-- Layer 6b: Scale bar (bottom-left) -->
-                        <g transform="translate(20,260)">
-                            <rect x="0" y="0" width="50" height="3" fill="#666" rx="1" />
-                            <rect x="0" y="0" width="25" height="3" fill="#aaa" rx="1" />
-                            <text x="0" y="-2" font-size="5" fill="#888" font-family="sans-serif">0</text>
-                            <text x="42" y="-2" font-size="5" fill="#888" font-family="sans-serif">1km</text>
-                        </g>
-
-                        <!-- Layer 7a: Animated pulse rings around pin (CSS animates opacity/scale) -->
-                        <circle cx="184" cy="153" r="22" fill="none" stroke="#e8b84b" stroke-width="1.5" opacity="0"
-                            class="map-ring map-ring-1" />
-                        <circle cx="184" cy="153" r="15" fill="none" stroke="#e8b84b" stroke-width="1.5" opacity="0"
-                            class="map-ring map-ring-2" />
-                        <!-- Static glow ring -->
-                        <circle cx="184" cy="153" r="8" fill="rgba(232,184,75,0.25)" stroke="#e8b84b"
-                            stroke-width="1.5" />
-                        <circle cx="184" cy="153" r="4" fill="#e8b84b" />
-
-                        <!-- Layer 7b: Location pin (bounces via CSS animation) -->
-                        <!-- Shadow at the base of the pin -->
-                        <ellipse cx="184" cy="172" rx="5" ry="2" fill="rgba(0,0,0,0.4)" />
-                        <!-- Pin stem (triangle) -->
-                        <path d="M184 170 L180 153 A4 4 0 0 1 188 153 Z" fill="#c0232b" class="map-pin-svg" />
-                        <!-- Pin head (circle) with gloss highlight -->
-                        <circle cx="184" cy="150" r="6" fill="#e8546a" stroke="#fff" stroke-width="1.2"
-                            class="map-pin-svg" />
-                        <circle cx="182" cy="148" r="1.5" fill="rgba(255,255,255,0.6)" />
-                    </svg>
-
-                    <!-- Info card overlaid at the bottom of the map -->
-                    <div class="map-info-card">
-                        <!-- Animated live dot (pulsing red) -->
-                        <div class="mic-dot"></div>
-                        <div class="mic-text">
-                            <div class="mic-name">Sanjivani College of Engineering</div>
-                            <div class="mic-loc">📍 Kopargaon, Maharashtra — 423603</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-        <!-- End: about-content -->
-
-
-        <!-- ─────────────────────────────────
-             ABOUT PAGE FOOTER
-             College logo + copyright line.
-        ──────────────────────────────── -->
-        <footer class="about-footer">
-            <div class="about-footer-inner">
-                <!-- Logo mark and college name -->
-                <div class="about-footer-logo">
-                    <div class="logo-mark" style="width:36px; height:36px; font-size:18px">S</div>
-                    <div>
-                        <div class="footer-college-name">Sanjivani College of Engineering</div>
-                        <div class="footer-portal-name">CampusConnect — Event Management Portal</div>
-                    </div>
-                </div>
-                <!-- Copyright -->
-                <div class="about-footer-right">
-                    <span class="footer-copy">© 2026 Sanjivani College of Engineering. All rights reserved.</span>
-                </div>
-            </div>
-        </footer>
-
-    </div>
-    <!-- End: page-about -->
-
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         EVENT DETAIL MODAL  (id="modal")
-         A popup overlay shown when a user clicks on an event card.
-         The background dim (#modal) closes the popup on click.
-         openModal(id) in logic.js fills all the #m* fields.
-    ════════════════════════════════════════════════════════════════ -->
+    <!-- ═══ MODAL ═══ -->
     <div class="modal-bg" id="modal" onclick="closeModal(event)">
         <div class="modal">
-
-            <!-- Coloured banner at the top of the modal (matches event card color) -->
             <div class="modal-banner" id="mBanner">
-                <!-- Close button — calls closeModalD() to dismiss -->
                 <button class="modal-close" onclick="closeModalD()">✕</button>
-                <!-- Department and club labels -->
-                <div>
-                    <div id="mDept" class="modal-dept-label"></div>
-                    <div id="mClub" class="modal-club-label"></div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                    <div id="mDept"
+                        style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.08em">
+                    </div>
+                    <div id="mClub"
+                        style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:0.06em">
+                    </div>
                 </div>
-                <!-- Status badge (Ongoing / Upcoming / Past) -->
                 <span class="badge" id="mBadge"></span>
             </div>
-
-            <!-- Modal body: title, description, info boxes, action buttons -->
             <div class="modal-body">
                 <div class="modal-title" id="mTitle"></div>
                 <div class="modal-desc" id="mDesc"></div>
-
-                <!-- Four info boxes: Date / Time / Venue / RSVPs -->
                 <div class="info-grid">
                     <div class="info-box">
                         <div class="info-box-label">📅 Date</div>
@@ -1179,28 +577,14 @@
                         <div class="info-box-value" id="mRsvp"></div>
                     </div>
                 </div>
-
-                <!-- Action buttons at the bottom of the modal -->
                 <div class="modal-actions">
                     <button class="btn btn-primary btn-full" onclick="closeModalD()">🎫 RSVP Now</button>
-                    <button class="btn btn-ghost   btn-full" onclick="closeModalD()">Share Event</button>
+                    <button class="btn btn-ghost btn-full" onclick="closeModalD()">Share Event</button>
                 </div>
             </div>
-
         </div>
     </div>
-    <!-- End: modal -->
-
-
-    <!-- ─────────────────────────────────
-         JavaScript file
-         All interactivity is inside logic.js.
-         It must be placed at the END of <body>
-         so the HTML elements above exist before
-         the JavaScript tries to find them.
-    ──────────────────────────────── -->
-    <script src="logic.js"></script>
-
+    <script src="script.js"></script>
 </body>
 
 </html>

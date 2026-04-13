@@ -1,0 +1,193 @@
+:root {
+    --white: #ffffff;
+    --black: #000000;
+    --gray-light: #f5f5f5;
+    --gray: #cccccc;
+    --gray-dark: #666666;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--white);
+    color: var(--black);
+    line-height: 1.5;
+}
+
+/* Flexbox Utilities */
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-between {
+    justify-content: space-between;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.gap-8 {
+    gap: 8px;
+}
+
+.gap-16 {
+    gap: 16px;
+}
+
+/* Spacing & Layout */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mb-16 {
+    margin-bottom: 16px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Navigation */
+nav {
+    padding: 16px 20px;
+    border-bottom: 2px solid var(--black);
+    background: var(--white);
+}
+
+.logo {
+    font-size: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--black);
+    font-weight: bold;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons & Inputs */
+.btn {
+    padding: 8px 16px;
+    border: 1px solid var(--black);
+    background: var(--white);
+    color: var(--black);
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.btn:hover {
+    background: var(--gray-light);
+}
+
+.btn-black {
+    background: var(--black);
+    color: var(--white);
+}
+
+.btn-black:hover {
+    background: var(--gray-dark);
+}
+
+.input {
+    padding: 10px;
+    border: 1px solid var(--gray);
+    width: 100%;
+    font-family: inherit;
+}
+
+.input:focus {
+    border-color: var(--black);
+    outline: none;
+}
+
+/* Cards & Grids */
+.grid-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.card {
+    border: 2px solid var(--black);
+    padding: 16px;
+    flex: 1 1 calc(33.333% - 16px);
+    min-width: 250px;
+    background: var(--white);
+}
+
+.card h3 {
+    border-bottom: 1px solid var(--black);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.card-meta {
+    font-size: 12px;
+    color: var(--gray-dark);
+    margin-bottom: 8px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 11px;
+    border: 1px solid var(--black);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+header {
+    padding: 40px 0;
+    border-bottom: 1px solid var(--gray);
+    margin-bottom: 20px;
+}
+
+.section-title {
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--black);
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+}
+
+.login-card {
+    max-width: 400px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+hr {
+    border: none;
+    border-top: 1px dashed var(--gray);
+    margin: 16px 0;
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="flex flex-between">
+        <div class="logo font-bold" onclick="showPage('home')">CampusConnect</div>
+        <div class="nav-links flex gap-16">
+            <a href="#" onclick="showPage('home')">Home</a>
+            <button id="navLoginBtn" class="btn" onclick="showPage('login')">Coordinator Login</button>
+            <button id="navDashBtn" class="btn hidden" onclick="showPage('dashboard')">Dashboard</button>
+            <button id="navLogoutBtn" class="btn hidden" onclick="doLogout()">Logout</button>
+        </div>
+    </nav>
+
+    <div id="page-home" class="page active container">
+        <header class="text-center">
+            <h1>Discover Events</h1>
+            <p>Your central hub for campus events organized by department.</p>
+        </header>
+
+        <div class="flex gap-16 filter-bar">
+            <select id="filterDept" class="input" onchange="renderPublic()">
+                <option value="all">All Departments</option>
+            </select>
+            <input type="text" id="filterSearch" class="input flex-1" placeholder="Search events..."
+                oninput="renderPublic()">
+        </div>
+
+        <h2 class="section-title">Events</h2>
+        <div id="eventsGrid" class="grid-cards"></div>
+
+        <h2 class="section-title">Clubs</h2>
+        <div id="clubsGrid" class="grid-cards"></div>
+    </div>
+
+    <div id="page-login" class="page container text-center">
+        <div class="card login-card">
+            <h2>Coordinator Portal</h2>
+            <select id="loginDept" class="input"></select>
+            <input type="text" id="loginId" class="input" placeholder="Coordinator ID (e.g. COORD-CS-01)">
+            <input type="password" id="loginPass" class="input" placeholder="Password">
+            <button class="btn btn-black" onclick="doLogin()">Sign In</button>
+        </div>
+    </div>
+
+    <div id="page-dashboard" class="page container">
+        <div class="flex flex-between align-center mb-16">
+            <h2 id="dashTitle">Dashboard</h2>
+        </div>
+
+        <div class="flex gap-16 dash-grid">
+            <div class="card flex-1">
+                <h3>Manage Clubs</h3>
+                <div class="form-group flex flex-col gap-8">
+                    <input type="text" id="nClubName" class="input" placeholder="Club Name">
+                    <input type="text" id="nClubCat" class="input" placeholder="Category">
+                    <input type="text" id="nClubDesc" class="input" placeholder="Description">
+                    <button class="btn btn-black" onclick="createClub()">Add Club</button>
+                </div>
+                <hr>
+                <div id="dClubList" class="flex flex-col gap-8"></div>
+            </div>
+
+            <div class="card flex-1">
+                <h3>Post Event</h3>
+                <div class="form-group flex flex-col gap-8">
+                    <input type="text" id="nEvTitle" class="input" placeholder="Event Title">
+                    <select id="nEvClub" class="input"></select>
+                    <div class="flex gap-8">
+                        <input type="date" id="nEvDate" class="input flex-1">
+                        <input type="time" id="nEvTime" class="input flex-1" value="10:00">
+                    </div>
+                    <input type="text" id="nEvVenue" class="input" placeholder="Venue">
+                    <select id="nEvStatus" class="input">
+                        <option value="upcoming">Upcoming</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="past">Past</option>
+                    </select>
+                    <textarea id="nEvDesc" class="input" placeholder="Description"></textarea>
+                    <button class="btn btn-black" onclick="postEvent()">Add Event</button>
+                </div>
+                <hr>
+                <div id="dEvList" class="flex flex-col gap-8"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
