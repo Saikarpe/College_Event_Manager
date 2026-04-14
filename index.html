@@ -2,589 +2,436 @@
 <html lang="en">
 
 <head>
+    <!-- META CHARSET: tells the browser to use UTF-8 character encoding -->
     <meta charset="UTF-8">
+
+    <!-- VIEWPORT: makes the page mobile-responsive by setting scale to 1 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="CampusConnect — Your central hub for college events, clubs, calendars and campus info across every department.">
-    <title>CampusConnect — College Event Portal</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+
+    <!-- PAGE DESCRIPTION for search engines (SEO) -->
+    <meta name="description" content="CampusConnect — Central platform for college events across all departments">
+
+    <!-- PAGE TITLE: shown in browser tab -->
+    <title>CampusConnect — College Event Management</title>
+
+    <!-- Google Fonts: Poppins — a clean modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Linking our external CSS stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- TOAST -->
-    <div class="toast" id="toast">✓ <span id="toastMsg"></span></div>
 
-    <!-- ═══ NAV ═══ -->
-    <nav>
-        <div class="nav-logo" onclick="goHome()">
-            <div class="logo-mark">C</div>
-            <span class="logo-text">Campus<span>Connect</span></span>
+    <!-- ============================================================
+         NAVIGATION BAR
+         Fixed at the top; contains logo, nav links, and login button
+    ============================================================ -->
+    <nav id="navbar">
+        <!-- Logo on the left -->
+        <div class="nav-logo">🎓 CampusConnect</div>
+
+        <!-- Navigation links: clicking scrolls to the section -->
+        <div class="nav-links">
+            <a href="#section-events">Events</a>
+            <a href="#section-clubs">Clubs</a>
+            <a href="#section-about">About</a>
         </div>
-        <div class="nav-center">
-            <a class="nav-link active" href="#section-events" onclick="setActiveNav(this)">Events</a>
-            <a class="nav-link" href="#section-clubs" onclick="setActiveNav(this)">Clubs</a>
-            <a class="nav-link" href="#section-calendar" onclick="setActiveNav(this)">Calendar</a>
-            <a class="nav-link" href="#section-about" onclick="setActiveNav(this)">About</a>
+
+        <!-- Action buttons on the right -->
+        <div class="nav-actions">
+            <!-- Login button: hidden after successful login -->
+            <button id="btnLogin" class="btn btn-primary" onclick="showPage('login')">
+                Coordinator Login
+            </button>
+
+            <!-- Logout button: shown only after login (hidden by default) -->
+            <button id="btnLogout" class="btn btn-outline" style="display:none" onclick="doLogout()">
+                Logout
+            </button>
         </div>
-        <div class="nav-right">
-            <button id="navLogoutBtn" class="btn btn-ghost btn-sm" style="display:none" onclick="doLogout()">Sign
-                Out</button>
-            <button id="navLoginBtn" class="btn btn-ghost btn-sm" onclick="showPage('dept-login')">Coordinator
-                Login</button>
-            <button class="btn btn-primary btn-sm">🎫 Register</button>
-        </div>
-        <!-- Mobile hamburger -->
-        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
-            <span></span><span></span><span></span>
-        </button>
     </nav>
 
-    <!-- Mobile nav drawer -->
-    <div class="mobile-nav" id="mobileNav">
-        <a class="mobile-nav-link" href="#section-events" onclick="closeMobileMenu()">Events</a>
-        <a class="mobile-nav-link" href="#section-clubs" onclick="closeMobileMenu()">Clubs</a>
-        <a class="mobile-nav-link" href="#section-calendar" onclick="closeMobileMenu()">Calendar</a>
-        <a class="mobile-nav-link" href="#section-about" onclick="closeMobileMenu()">About</a>
-    </div>
-
-    <!-- ═══════════════════════
-     HOME PAGE
-═══════════════════════ -->
+    <!-- ============================================================
+         PAGE: HOME
+         Contains: Hero section, Events, Clubs, About, Footer
+         The class "active" makes this page visible on load.
+    ============================================================ -->
     <div id="page-home" class="page active">
 
-        <!-- ──── HERO ──── -->
+        <!-- ── HERO SECTION ── -->
         <section class="hero">
-            <div class="hero-glow-a"></div>
-            <div class="hero-glow-b"></div>
-            <div class="eyebrow">
-                <div class="eyebrow-dot"></div>
-                Academic Year 2025–26
-            </div>
-            <h1>Discover <em>Events</em><br>Across Every Department</h1>
-            <p class="hero-sub">Your central hub for campus events — workshops, fests, competitions, seminars and more.
-                Organized by department.</p>
+            <h1>College Event Management</h1>
+            <p>A centralized platform for events organized by student clubs across all departments</p>
+
+            <!-- Live statistics bar -->
             <div class="hero-stats">
-                <div class="h-stat">
-                    <div class="h-stat-num gold" id="stat-up">0<span>+</span></div>
-                    <div class="h-stat-label">Upcoming events</div>
+                <div class="stat-item">
+                    <!-- These numbers are updated by JavaScript -->
+                    <span class="stat-num" id="statEvents">0</span>
+                    <span class="stat-label">Total Events</span>
                 </div>
-                <div class="h-divider"></div>
-                <div class="h-stat">
-                    <div class="h-stat-num jade" id="stat-on">0</div>
-                    <div class="h-stat-label">Ongoing today</div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="statOngoing">0</span>
+                    <span class="stat-label">Ongoing</span>
                 </div>
-                <div class="h-divider"></div>
-                <div class="h-stat">
-                    <div class="h-stat-num" id="stat-clubs">0</div>
-                    <div class="h-stat-label">Active clubs</div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num" id="statClubs">0</span>
+                    <span class="stat-label">Active Clubs</span>
                 </div>
-                <div class="h-divider"></div>
-                <div class="h-stat">
-                    <div class="h-stat-num" id="stat-depts">8</div>
-                    <div class="h-stat-label">Departments</div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num">8</span>
+                    <span class="stat-label">Departments</span>
                 </div>
             </div>
         </section>
 
         <!-- ════════════════════════════════
-       SECTION: EVENTS
-  ════════════════════════════════ -->
-        <section id="section-events" class="home-section">
-            <div class="section-header-row">
-                <div class="section-header-left">
-                    <div class="section-icon">📅</div>
-                    <div>
-                        <h2 class="section-heading">Events</h2>
-                        <p class="section-subtitle">Explore upcoming, ongoing and past events across all departments</p>
-                    </div>
-                </div>
+             SECTION: EVENTS
+        ════════════════════════════════ -->
+        <section id="section-events" class="section">
+            <div class="section-header">
+                <h2>📅 Events</h2>
+                <p>Browse all events across departments — filter by department, status, or search</p>
             </div>
 
-            <!-- Department Dropdown + Search + Status Filters -->
+            <!-- FILTER BAR: 3 controls - Department, Status, Search -->
             <div class="filter-bar">
-                <div class="dept-dropdown-wrap" id="deptDropdownWrap">
-                    <button class="dept-dropdown-btn" id="deptDropdownBtn" onclick="toggleDeptDropdown()">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <span id="deptDropdownLabel">All Departments</span>
-                        <svg class="dd-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </button>
-                    <div class="dept-dropdown-menu" id="deptDropdownMenu">
-                        <div class="dept-dropdown-item active" data-dept="all" onclick="selectDept(this, 'all')">
-                            <span>🏫</span> All Departments
-                        </div>
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-                <div class="search-wrap">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.35-4.35" />
-                    </svg>
-                    <input class="search-input" id="searchInput" type="text" placeholder="Search events, clubs…"
-                        oninput="renderEvents()">
-                </div>
-                <div class="status-tabs">
-                    <button class="stab active" data-s="all" onclick="setStatus(this)">All</button>
-                    <button class="stab" data-s="ongoing" onclick="setStatus(this)">🟢 Ongoing</button>
-                    <button class="stab" data-s="upcoming" onclick="setStatus(this)">🟡 Upcoming</button>
-                    <button class="stab" data-s="past" onclick="setStatus(this)">Past</button>
-                </div>
+                <!-- Department dropdown: options added by JavaScript -->
+                <select id="filterDept" onchange="applyFilter()">
+                    <option value="all">All Departments</option>
+                </select>
+
+                <!-- Status filter dropdown -->
+                <select id="filterStatus" onchange="applyFilter()">
+                    <option value="all">All Status</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="past">Past</option>
+                </select>
+
+                <!-- Search box: oninput fires as user types -->
+                <input type="text" id="searchInput" placeholder="🔍 Search events..." oninput="applyFilter()">
             </div>
 
-            <div class="section-bar">
-                <div class="section-title">Events</div>
-                <span class="section-count" id="evCount">0 events</span>
-            </div>
-
-            <div class="events-flex" id="evGrid"></div>
+            <!-- EVENTS GRID: event cards are injected here by JavaScript -->
+            <div class="cards-grid" id="eventsGrid"></div>
         </section>
 
         <!-- ════════════════════════════════
-       SECTION: CLUBS
-  ════════════════════════════════ -->
-        <section id="section-clubs" class="home-section">
-            <div class="section-header-row">
-                <div class="section-header-left">
-                    <div class="section-icon">🏛️</div>
-                    <div>
-                        <h2 class="section-heading">Clubs</h2>
-                        <p class="section-subtitle">Student organizations driving innovation, culture and community</p>
-                    </div>
-                </div>
+             SECTION: CLUBS
+        ════════════════════════════════ -->
+        <section id="section-clubs" class="section">
+            <div class="section-header">
+                <h2>🏛️ Clubs</h2>
+                <p>Student organizations across all departments</p>
             </div>
-            <div class="clubs-grid" id="clubsGrid"></div>
+
+            <!-- CLUBS GRID: club cards injected by JavaScript -->
+            <div class="cards-grid" id="clubsGrid"></div>
         </section>
 
         <!-- ════════════════════════════════
-       SECTION: CALENDAR
-  ════════════════════════════════ -->
-        <section id="section-calendar" class="home-section">
-            <div class="section-header-row">
-                <div class="section-header-left">
-                    <div class="section-icon">🗓️</div>
-                    <div>
-                        <h2 class="section-heading">Calendar</h2>
-                        <p class="section-subtitle">View all events at a glance — plan your week ahead</p>
-                    </div>
-                </div>
-                <div class="calendar-nav">
-                    <button class="cal-nav-btn" onclick="changeMonth(-1)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="m15 18-6-6 6-6" />
-                        </svg>
-                    </button>
-                    <span class="cal-month-label" id="calMonthLabel"></span>
-                    <button class="cal-nav-btn" onclick="changeMonth(1)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="m9 18 6-6-6-6" />
-                        </svg>
-                    </button>
-                </div>
+             SECTION: ABOUT
+        ════════════════════════════════ -->
+        <section id="section-about" class="section">
+            <div class="section-header">
+                <h2>ℹ️ About</h2>
             </div>
-            <div class="calendar-wrap">
-                <div class="calendar-grid" id="calendarGrid"></div>
-            </div>
-            <div class="cal-legend">
-                <span class="cal-legend-item"><span class="cal-dot cal-dot-ongoing"></span> Ongoing</span>
-                <span class="cal-legend-item"><span class="cal-dot cal-dot-upcoming"></span> Upcoming</span>
-                <span class="cal-legend-item"><span class="cal-dot cal-dot-past"></span> Past</span>
-            </div>
-        </section>
+            <div class="about-box">
+                <h3>About CampusConnect</h3>
+                <p>CampusConnect is a centralized web platform built as a mini-project for the Web Technologies course.
+                    It manages and displays events organized by student clubs across all departments.</p>
 
-        <!-- ════════════════════════════════
-       SECTION: ABOUT
-  ════════════════════════════════ -->
-        <section id="section-about" class="home-section about-section">
-            <div class="section-header-row">
-                <div class="section-header-left">
-                    <div class="section-icon">ℹ️</div>
-                    <div>
-                        <h2 class="section-heading">About CampusConnect</h2>
-                        <p class="section-subtitle">Learn more about our platform, institution and how to reach us</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="about-grid">
-                <!-- Info Cards -->
-                <div class="about-col">
-                    <div class="about-card">
-                        <div class="about-card-icon">🎯</div>
-                        <h3>Our Mission</h3>
-                        <p>CampusConnect bridges the gap between departments and students by providing a unified
-                            platform for all campus events. We aim to make event discovery seamless and encourage
-                            cross-department collaboration and participation.</p>
-                    </div>
-                    <div class="about-card">
-                        <div class="about-card-icon">🏫</div>
-                        <h3>The Institution</h3>
-                        <p>Our college is a premier institution offering programs in Computer Science, Information
-                            Technology, Electronics, Mechanical, Electrical, Mechatronics, Structural, and Civil
-                            Engineering. With a vibrant community of 5,000+ students and 8 departments, innovation
-                            thrives here every day.</p>
-                    </div>
-                    <div class="about-card">
-                        <div class="about-card-icon">⚡</div>
-                        <h3>Platform Features</h3>
-                        <ul class="about-features-list">
-                            <li>Real-time event tracking & RSVP system</li>
-                            <li>Department-specific coordinator dashboards</li>
-                            <li>Club creation & management tools</li>
-                            <li>Interactive calendar with event highlights</li>
-                            <li>Cross-department event discovery</li>
-                        </ul>
-                    </div>
-                    <div class="about-card">
-                        <div class="about-card-icon">📞</div>
-                        <h3>Contact Us</h3>
-                        <div class="contact-grid">
-                            <div class="contact-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path
-                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                    <polyline points="22,6 12,13 2,6" />
-                                </svg>
-                                <span>events@campusconnect.edu</span>
-                            </div>
-                            <div class="contact-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path
-                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                                </svg>
-                                <span>+91 90000 12345</span>
-                            </div>
-                            <div class="contact-item">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                                    <circle cx="12" cy="9" r="2.5" />
-                                </svg>
-                                <span>101 College Road, Pune, Maharashtra, India 411001</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="about-features">
+                    <div class="feature-item">🎯 Browse events from all departments in one place</div>
+                    <div class="feature-item">🏛️ Discover student clubs and their activities</div>
+                    <div class="feature-item">📅 Filter by department, status, or keyword search</div>
+                    <div class="feature-item">🎫 Register for events via RSVP (sent to Java Servlet)</div>
+                    <div class="feature-item">🔐 Coordinator login to manage clubs &amp; events (PHP + MySQL)</div>
                 </div>
 
-                <!-- Map -->
-                <div class="about-col about-map-col">
-                    <div class="about-map-card">
-                        <div class="about-map-label">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                                <circle cx="12" cy="9" r="2.5" />
-                            </svg>
-                            Campus Location
-                        </div>
-                        <div class="map-container">
-                            <iframe id="campusMap"
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.065343414441!2d73.85674421531788!3d18.52043088741937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c065e1cce781%3A0x817e26cdb8742e08!2sPune%2C%20Maharashtra%2C%20India!5e0!3m2!1sen!2sin!4v1680000000000!5m2!1sen!2sin"
-                                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade">
-                            </iframe>
-                        </div>
-                    </div>
-                    <div class="about-quick-stats">
-                        <div class="about-stat-card">
-                            <div class="about-stat-num">5000+</div>
-                            <div class="about-stat-label">Students</div>
-                        </div>
-                        <div class="about-stat-card">
-                            <div class="about-stat-num">8</div>
-                            <div class="about-stat-label">Departments</div>
-                        </div>
-                        <div class="about-stat-card">
-                            <div class="about-stat-num">50+</div>
-                            <div class="about-stat-label">Annual Events</div>
-                        </div>
-                        <div class="about-stat-card">
-                            <div class="about-stat-num">20+</div>
-                            <div class="about-stat-label">Active Clubs</div>
-                        </div>
+                <!-- Tech Stack used in this project -->
+                <div class="tech-stack">
+                    <h4>Tech Stack:</h4>
+                    <div class="tech-badges">
+                        <span class="tech-badge">HTML5</span>
+                        <span class="tech-badge">CSS3</span>
+                        <span class="tech-badge">JavaScript (ES6+)</span>
+                        <span class="tech-badge">PHP 8</span>
+                        <span class="tech-badge">Java Servlet</span>
+                        <span class="tech-badge">Angular</span>
+                        <span class="tech-badge">MySQL</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ──── FOOTER ──── -->
-        <footer class="site-footer">
-            <div class="footer-inner">
-                <div class="footer-brand">
-                    <div class="nav-logo">
-                        <div class="logo-mark">C</div>
-                        <span class="logo-text">Campus<span>Connect</span></span>
-                    </div>
-                    <p class="footer-tagline">Your central hub for campus events.</p>
-                </div>
-                <div class="footer-links">
-                    <a href="#section-events">Events</a>
-                    <a href="#section-clubs">Clubs</a>
-                    <a href="#section-calendar">Calendar</a>
-                    <a href="#section-about">About</a>
-                </div>
-                <div class="footer-copy">© 2026 CampusConnect. All rights reserved.</div>
-            </div>
+        <!-- FOOTER -->
+        <footer>
+            <p>© 2026 CampusConnect — Web Technologies Mini Project</p>
         </footer>
-    </div>
+    </div><!-- end page-home -->
 
-    <!-- ═══════════════════════
-     COORDINATOR LOGIN
-═══════════════════════ -->
-    <div id="page-dept-login" class="page">
-        <div class="login-card">
-            <div class="login-top">
-                <div class="login-icon">🎓</div>
-                <div class="login-title">Coordinator Portal</div>
-                <div class="login-sub">Sign in to manage your department's clubs & events</div>
-            </div>
-            <div class="form-stack">
+
+    <!-- ============================================================
+         PAGE: COORDINATOR LOGIN
+         Only visible when showPage('login') is called
+    ============================================================ -->
+    <div id="page-login" class="page">
+        <div class="center-wrap">
+            <div class="form-card">
+
+                <!-- Card header with icon and title -->
+                <div class="form-card-top">
+                    <span class="form-icon">🔐</span>
+                    <h2>Coordinator Login</h2>
+                    <p>Sign in to manage your department's clubs &amp; events</p>
+                </div>
+
+                <!-- Department select: populated by JavaScript -->
                 <div class="form-group">
-                    <label class="form-label">Department</label>
-                    <select class="form-input" id="loginDept">
-                        <option value="">Select your department…</option>
+                    <label for="loginDept">Department</label>
+                    <select id="loginDept">
+                        <option value="">Select your department...</option>
                     </select>
                 </div>
+
+                <!-- Coordinator ID input -->
                 <div class="form-group">
-                    <label class="form-label">Coordinator ID</label>
-                    <input class="form-input" type="text" id="loginId" placeholder="e.g. COORD-CS-01">
+                    <label for="loginId">Coordinator ID</label>
+                    <input type="text" id="loginId" placeholder="e.g. COORD-CS-01">
                 </div>
+
+                <!-- Password input -->
                 <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input class="form-input" type="password" id="loginPass" placeholder="Enter your password">
+                    <label for="loginPass">Password</label>
+                    <input type="password" id="loginPass" placeholder="Enter your password">
                 </div>
-                <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:4px">Sign In →</button>
-            </div>
-            <div class="divider">or</div>
-            <button class="btn btn-ghost btn-full" onclick="goHome()">← Back to Events</button>
-            <div class="login-hint">
-                Each department has one designated coordinator.<br>
-                Contact the admin if you need access credentials.
+
+                <!-- Sign-In button calls doLogin() in script.js -->
+                <button class="btn btn-primary btn-full" onclick="doLogin()">Sign In →</button>
+
+                <!-- Back button goes back to home page -->
+                <button class="btn btn-outline btn-full" onclick="showPage('home')" style="margin-top:8px">
+                    ← Back to Home
+                </button>
+
+                <!-- Hint for the examiner / demo -->
+                <div class="login-hint">
+                    <strong>Sample:</strong> Select "Computer Science" | ID: COORD-CS-01 | Pass: cs@123
+                </div>
             </div>
         </div>
-    </div>
+    </div><!-- end page-login -->
 
-    <!-- ═══════════════════════
-     COORDINATOR DASHBOARD
-═══════════════════════ -->
+
+    <!-- ============================================================
+         PAGE: COORDINATOR DASHBOARD
+         Only visible after successful login
+    ============================================================ -->
     <div id="page-dashboard" class="page">
+        <div class="dash-wrap">
 
-        <div class="dash-header">
-            <div class="flex-col" style="gap:6px">
-                <div class="flex" style="align-items:center;gap:10px">
-                    <div class="dash-title" id="dashTitle">Dashboard</div>
-                    <div class="dash-dept-tag" id="dashDeptTag"></div>
+            <!-- Dashboard title and logout -->
+            <div class="dash-header">
+                <div>
+                    <h2 id="dashTitle">Dashboard</h2>
+                    <p id="dashSub">Manage your department's clubs and events</p>
                 </div>
-                <div class="dash-sub" id="dashSub">Welcome, Coordinator</div>
+                <button class="btn btn-outline" onclick="doLogout()">Logout</button>
             </div>
-            <button class="btn btn-ghost btn-sm" onclick="doLogout()">Sign Out</button>
-        </div>
 
-        <!-- KPIs -->
-        <div class="kpi-row">
-            <div class="kpi">
-                <div class="kpi-label">Total Clubs</div>
-                <div class="kpi-val gold" id="kClubs">0</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Total Events</div>
-                <div class="kpi-val" id="kEvents">0</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Ongoing</div>
-                <div class="kpi-val jade" id="kOngoing">0</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Upcoming</div>
-                <div class="kpi-val sky" id="kUpcoming">0</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">Total RSVPs</div>
-                <div class="kpi-val gold" id="kRsvp">0</div>
-            </div>
-        </div>
-
-        <!-- Dashboard tabs -->
-        <div class="dash-tabs">
-            <button class="dtab active" onclick="setDTab(this,'clubs')">🏛️ Clubs</button>
-            <button class="dtab" onclick="setDTab(this,'events')">📅 Events</button>
-        </div>
-
-        <!-- CLUBS panel -->
-        <div id="dpanel-clubs">
-            <div class="sec-h">➕ Create New Club</div>
-            <div class="form-card">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Club Name</label>
-                        <input class="form-input" id="nClubName" type="text" placeholder="e.g. Robotics Club">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select class="form-input" id="nClubCat">
-                            <option>Technical</option>
-                            <option>Cultural</option>
-                            <option>Sports</option>
-                            <option>Social</option>
-                            <option>Academic</option>
-                            <option>Arts</option>
-                        </select>
-                    </div>
-                    <div class="form-group full">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-textarea" id="nClubDesc"
-                            placeholder="Brief description of the club…"></textarea>
-                    </div>
+            <!-- KPI Cards (Key Performance Indicators) — summary numbers -->
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-num" id="kClubs">0</div>
+                    <div class="kpi-label">Clubs</div>
                 </div>
-                <div class="flex-end" style="gap:8px">
-                    <button class="btn btn-ghost" onclick="clearClubForm()">Clear</button>
-                    <button class="btn btn-primary" onclick="createClub()">Create Club →</button>
+                <div class="kpi-card">
+                    <div class="kpi-num" id="kEvents">0</div>
+                    <div class="kpi-label">Events</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-num" id="kOngoing">0</div>
+                    <div class="kpi-label">Ongoing</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-num" id="kUpcoming">0</div>
+                    <div class="kpi-label">Upcoming</div>
                 </div>
             </div>
 
-            <div class="sec-h">🏛️ Department Clubs</div>
-            <div class="club-list" id="dClubList"></div>
-        </div>
+            <!-- Tab buttons to switch between Clubs and Events panel -->
+            <div class="tab-bar">
+                <button class="tab active" id="tabClubs" onclick="switchTab('clubs')">🏛️ Clubs</button>
+                <button class="tab" id="tabEvents" onclick="switchTab('events')">📅 Events</button>
+            </div>
 
-        <!-- EVENTS panel -->
-        <div id="dpanel-events" style="display:none">
-            <div class="sec-h">➕ Post New Event</div>
-            <div class="form-card">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Event Title</label>
-                        <input class="form-input" id="nEvTitle" type="text" placeholder="Event name">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Club</label>
-                        <select class="form-input" id="nEvClub"></select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Date</label>
-                        <input class="form-input" id="nEvDate" type="date">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Time</label>
-                        <input class="form-input" id="nEvTime" type="time" value="10:00">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Venue</label>
-                        <input class="form-input" id="nEvVenue" type="text" placeholder="e.g. Seminar Hall A">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Status</label>
-                        <select class="form-input" id="nEvStatus">
-                            <option value="upcoming">Upcoming</option>
-                            <option value="ongoing">Ongoing</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group full">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-textarea" id="nEvDesc" placeholder="Describe the event…"></textarea>
-                    </div>
-                </div>
-                <div class="form-row" style="align-items:center;margin-bottom:0">
-                    <div class="form-group" style="flex:1">
-                        <label class="form-label">Card Color</label>
-                        <div class="color-row" id="colorPick">
-                            <div class="cp sel g1" data-c="g1" onclick="pickColor(this)"></div>
-                            <div class="cp g2" data-c="g2" onclick="pickColor(this)"></div>
-                            <div class="cp g3" data-c="g3" onclick="pickColor(this)"></div>
-                            <div class="cp g4" data-c="g4" onclick="pickColor(this)"></div>
-                            <div class="cp g5" data-c="g5" onclick="pickColor(this)"></div>
-                            <div class="cp g6" data-c="g6" onclick="pickColor(this)"></div>
-                            <div class="cp g7" data-c="g7" onclick="pickColor(this)"></div>
-                            <div class="cp g8" data-c="g8" onclick="pickColor(this)"></div>
+            <!-- ─── CLUBS PANEL ─── -->
+            <div id="panel-clubs">
+
+                <!-- Add Club Form -->
+                <div class="panel-card">
+                    <h3>➕ Create New Club</h3>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Club Name</label>
+                            <input type="text" id="newClubName" placeholder="e.g. Coding Club">
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="newClubCat">
+                                <option>Technical</option>
+                                <option>Cultural</option>
+                                <option>Sports</option>
+                                <option>Social</option>
+                                <option>Academic</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="flex-end" style="gap:8px;padding-top:20px">
-                        <button class="btn btn-ghost" onclick="clearEvForm()">Clear</button>
-                        <button class="btn btn-primary" onclick="postEvent()">Post Event →</button>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="newClubDesc" rows="2" placeholder="Brief description of the club..."></textarea>
                     </div>
+                    <button class="btn btn-primary" onclick="addClub()">Create Club</button>
+                </div>
+
+                <!-- Club list for this department -->
+                <h3 class="panel-title">Your Clubs</h3>
+                <div id="dashClubList"></div>
+            </div>
+
+            <!-- ─── EVENTS PANEL ─── -->
+            <div id="panel-events" style="display:none">
+
+                <!-- Add Event Form -->
+                <div class="panel-card">
+                    <h3>➕ Post New Event</h3>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label>Event Title</label>
+                            <input type="text" id="newEvTitle" placeholder="e.g. Code Sprint 2026">
+                        </div>
+                        <div class="form-group">
+                            <label>Select Club</label>
+                            <!-- Populated by JavaScript from dept's clubs -->
+                            <select id="newEvClub"></select>
+                        </div>
+                    </div>
+                    <div class="form-row-4">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="newEvDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="newEvTime" value="10:00">
+                        </div>
+                        <div class="form-group">
+                            <label>Venue</label>
+                            <input type="text" id="newEvVenue" placeholder="e.g. Seminar Hall A">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="newEvStatus">
+                                <option value="upcoming">Upcoming</option>
+                                <option value="ongoing">Ongoing</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="newEvDesc" rows="2" placeholder="Describe the event..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="addEvent()">Post Event</button>
+                </div>
+
+                <!-- Events table -->
+                <h3 class="panel-title">Your Events</h3>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Event Title</th>
+                                <th>Club</th>
+                                <th>Date</th>
+                                <th>Venue</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <!-- Rows inserted by JavaScript -->
+                        <tbody id="dashEventBody"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <div class="sec-h">📋 Department Events</div>
-            <div class="etable-wrap">
-                <table class="etable">
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Club</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th>RSVPs</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dEvTable"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+        </div><!-- end dash-wrap -->
+    </div><!-- end page-dashboard -->
 
-    <!-- ═══ MODAL ═══ -->
-    <div class="modal-bg" id="modal" onclick="closeModal(event)">
-        <div class="modal">
-            <div class="modal-banner" id="mBanner">
-                <button class="modal-close" onclick="closeModalD()">✕</button>
-                <div style="display:flex;flex-direction:column;gap:4px">
-                    <div id="mDept"
-                        style="font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.08em">
-                    </div>
-                    <div id="mClub"
-                        style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:0.06em">
-                    </div>
-                </div>
-                <span class="badge" id="mBadge"></span>
+
+    <!-- ============================================================
+         RSVP MODAL
+         Shown when user clicks an event card.
+         The RSVP form sends data to the Java Servlet.
+    ============================================================ -->
+    <div id="modal" class="modal-overlay" onclick="closeModalOnBg(event)">
+        <div class="modal-box">
+
+            <!-- Modal top: dept tag + close button -->
+            <div class="modal-top">
+                <span id="modalDept" class="modal-dept"></span>
+                <button class="modal-close" onclick="closeModal()">✕</button>
             </div>
-            <div class="modal-body">
-                <div class="modal-title" id="mTitle"></div>
-                <div class="modal-desc" id="mDesc"></div>
-                <div class="info-grid">
-                    <div class="info-box">
-                        <div class="info-box-label">📅 Date</div>
-                        <div class="info-box-value" id="mDate"></div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-box-label">🕐 Time</div>
-                        <div class="info-box-value" id="mTime"></div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-box-label">📍 Venue</div>
-                        <div class="info-box-value" id="mVenue"></div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-box-label">👥 RSVPs</div>
-                        <div class="info-box-value" id="mRsvp"></div>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-primary btn-full" onclick="closeModalD()">🎫 RSVP Now</button>
-                    <button class="btn btn-ghost btn-full" onclick="closeModalD()">Share Event</button>
-                </div>
+
+            <!-- Status badge -->
+            <span id="modalBadge" class="badge"></span>
+
+            <!-- Event title and description -->
+            <h3 id="modalTitle"></h3>
+            <p id="modalDesc" class="modal-desc"></p>
+
+            <!-- Event details: date, time, venue, RSVPs -->
+            <div class="modal-meta">
+                <div class="meta-row"><span>📅</span><span id="modalDate"></span></div>
+                <div class="meta-row"><span>🕐</span><span id="modalTime"></span></div>
+                <div class="meta-row"><span>📍</span><span id="modalVenue"></span></div>
+                <div class="meta-row"><span>👥</span><span id="modalRsvp"></span></div>
             </div>
+
+            <hr>
+
+            <!-- RSVP Form: submitted to Java Servlet via fetch() -->
+            <h4>🎫 Register for this Event</h4>
+            <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="rsvpName" placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label>Your Email</label>
+                <input type="email" id="rsvpEmail" placeholder="Enter your email address">
+            </div>
+
+            <!-- Hidden field to store the event ID for the servlet -->
+            <input type="hidden" id="rsvpEventId">
+
+            <!-- Submit button calls submitRSVP() in script.js -->
+            <button class="btn btn-primary btn-full" onclick="submitRSVP()">Register →</button>
+            <button class="btn btn-outline btn-full" onclick="closeModal()" style="margin-top:8px">Close</button>
         </div>
-    </div>
+    </div><!-- end modal -->
+
+
+    <!-- TOAST NOTIFICATION: brief status messages shown at bottom-right -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Link our JavaScript file — placed at the end so HTML loads first -->
     <script src="script.js"></script>
+
 </body>
 
 </html>

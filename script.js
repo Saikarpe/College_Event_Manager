@@ -1,615 +1,715 @@
-/* ═══════════════════════════
-   DATA STORE
-═══════════════════════════ */
- 
-const DEPARTMENTS = [
-  { id:'cs',  name:'Computer Department',                  short:'CS',   coord_id:'COORD-CS-01',  pass:'cs@123' },
-  { id:'it',  name:'Information Technology',               short:'IT',   coord_id:'COORD-IT-01',  pass:'it@123' },
-  { id:'ece', name:'Electronics & Computer Engineering',   short:'ECE',  coord_id:'COORD-ECE-01', pass:'ece@123' },
-  { id:'me',  name:'Mechanical Department',                short:'ME',   coord_id:'COORD-ME-01',  pass:'me@123' },
-  { id:'ee',  name:'Electrical Department',                short:'EE',   coord_id:'COORD-EE-01',  pass:'ee@123' },
-  { id:'mx',  name:'Mechatronics Department',              short:'MX',   coord_id:'COORD-MX-01',  pass:'mx@123' },
-  { id:'st',  name:'Structural Department',                short:'ST',   coord_id:'COORD-ST-01',  pass:'st@123' },
-  { id:'cv',  name:'Civil Department',                     short:'CV',   coord_id:'COORD-CV-01',  pass:'cv@123' },
-  { id:'sac',  name:'Student Activity Council',            short:'sac',   coord_id:'COORD-SAC-01',  pass:'sac@123' },
-  { id:'nss',  name:'National Service Scheme',            short:'nss',   coord_id:'COORD-NSS-01',  pass:'nss@123' },
-  
-];
- 
-let clubs = [
-  { id:'c1', dept:'cs',  name:'Coding Club',      cat:'Technical', desc:'Competitive programming and software development.' },
-  { id:'c2', dept:'cs',  name:'AI/ML Society',    cat:'Technical', desc:'Artificial intelligence research and projects.' },
-  { id:'c3', dept:'it',  name:'CSI Chapter',      cat:'Technical', desc:'Computer Society of India student chapter.' },
-  { id:'c4', dept:'ece', name:'IEEE ECE',          cat:'Technical', desc:'IEEE student branch for electronics enthusiasts.' },
-  { id:'c5', dept:'me',  name:'Robocon Team',      cat:'Technical', desc:'National robotics competition team.' },
-  { id:'c6', dept:'ee',  name:'Power Systems Club',cat:'Technical', desc:'Electrical power and energy research.' },
-  { id:'c7', dept:'cs',  name:'Cultural Society',  cat:'Cultural',  desc:'Arts, music, and cultural events.' },
-  { id:'c8', dept:'cv',  name:'GreenBuild Club',   cat:'Social',    desc:'Sustainable construction and green design.' },
-];
- 
-let events = [
-  { id:1, dept:'cs',  club:'c1', title:'Code Sprint 2026',      desc:'24-hour competitive programming marathon. Solo and team participation. Cash prizes worth ₹15,000.',               date:'2026-04-15', time:'8:00 AM', venue:'CS Building',       status:'upcoming', rsvp:98,  color:'g1' },
-  { id:2, dept:'cs',  club:'c2', title:'AI & ML Seminar',       desc:'Expert talk on real-world applications of Artificial Intelligence and Machine Learning in industry and research.',  date:'2026-04-18', time:'11:00 AM',venue:'Seminar Hall A',     status:'upcoming', rsvp:72,  color:'g6' },
-  { id:3, dept:'it',  club:'c3', title:'Web Dev Bootcamp',      desc:'3-day intensive bootcamp on modern web development — HTML, CSS, JavaScript and React.',                           date:'2026-04-10', time:'10:00 AM',venue:'Lab 3 & 4',          status:'upcoming', rsvp:56,  color:'g2' },
-  { id:4, dept:'ece', club:'c4', title:'Arduino Workshop',      desc:'Hands-on workshop on Arduino microcontrollers. Build IoT projects and circuit designs from scratch.',              date:'2026-04-08', time:'2:00 PM', venue:'Electronics Lab',    status:'ongoing',  rsvp:34,  color:'g4' },
-  { id:5, dept:'me',  club:'c5', title:'Robocon Qualifier',     desc:'Internal qualifier for the national Robocon robotics competition. Present your bot concept.',                      date:'2026-04-20', time:'9:00 AM', venue:'Mechanical Workshop',status:'upcoming', rsvp:28,  color:'g3' },
-  { id:6, dept:'ee',  club:'c6', title:'Power Systems Talk',    desc:'Industry expert session on smart grid technology, renewable energy integration and demand forecasting.',          date:'2026-04-08', time:'3:00 PM', venue:'EE Seminar Room',    status:'ongoing',  rsvp:41,  color:'g5' },
-  { id:7, dept:'cs',  club:'c7', title:'Tarang Cultural Fest',  desc:'Annual cultural extravaganza featuring dance, drama, music, art installations and fashion show.',                  date:'2026-04-12', time:'5:00 PM', venue:'Auditorium',         status:'upcoming', rsvp:210, color:'g7' },
-  { id:8, dept:'cv',  club:'c8', title:'Green Build Expo',      desc:'Showcase of sustainable construction materials and techniques. Guest lectures from industry leaders.',             date:'2026-04-22', time:'10:00 AM',venue:'Civil Dept Hall',     status:'upcoming', rsvp:36,  color:'g4' },
-];
- 
-let currentDept = 'all';
-let currentStatus = 'all';
-let selectedColor = 'g1';
-let loggedIn = null; // dept object
-let dashTab = 'clubs';
-let calendarDate = new Date();
- 
-const AV_COLORS = ['#0D8AB9','#06B6D4','#1A9FCC','#0A7BA3','#068B99'];
-const AV_INIT   = ['RS','KP','AM','VD','SP'];
-const CLUB_AV_COLORS = ['#0D8AB9','#1A9FCC','#06B6D4','#0A7BA3','#068B99','#05899B','#0098B3','#04A5B5'];
-const DEPT_EMOJIS = { cs:'💻', it:'🖥️', ece:'⚡', me:'⚙️', ee:'🔌', mx:'🤖', st:'🏗️', cv:'🏛️' };
+/* ============================================================
+   CampusConnect — script.js
+   College Event Management (with_DB version)
 
-/* ═══════════════════════════
-   PAGE ROUTING
-═══════════════════════════ */
-function showPage(p) {
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
-}
-function goHome() { showPage('home'); renderAll(); }
+   ALL DATA COMES FROM MySQL DATABASE via PHP APIs.
+   No hardcoded clubs or events — the database is the single source of truth.
 
-/* Nav link active highlight */
-function setActiveNav(el) {
-  document.querySelectorAll('.nav-center .nav-link').forEach(l => l.classList.remove('active'));
-  el.classList.add('active');
-}
+   Flow:
+     1. Page loads → init() runs
+     2. init() fetches departments, clubs, events from PHP
+     3. Data is stored in JS arrays TEMPORARILY (for rendering only)
+     4. Any add/delete operation calls PHP → updates MySQL → refreshes local arrays
+============================================================ */
 
-/* Mobile menu */
-function toggleMobileMenu() {
-  document.getElementById('mobileNav').classList.toggle('open');
-}
-function closeMobileMenu() {
-  document.getElementById('mobileNav').classList.remove('open');
-}
- 
-/* ═══════════════════════════
-   INIT
-═══════════════════════════ */
-function init() {
-  // Populate dept select in login
-  const sel = document.getElementById('loginDept');
-  DEPARTMENTS.forEach(d => {
-    const o = document.createElement('option');
-    o.value = d.id; 
-    o.textContent = d.name;
-    sel.appendChild(o);
+
+/* ──────────────────────────────────────
+   SECTION 1: STATE VARIABLES
+   These start EMPTY — filled by PHP API calls in init()
+────────────────────────────────────── */
+
+let departments = [];   /* Filled by get_departments.php */
+let clubs = [];   /* Filled by get_clubs.php       */
+let events = [];   /* Filled by get_events.php      */
+let loggedInDept = null; /* Set after successful login    */
+
+
+/* ──────────────────────────────────────
+   SECTION 2: PAGE ROUTING
+────────────────────────────────────── */
+
+/**
+ * showPage(name) — shows page-{name} and hides all others.
+ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(function (page) {
+    page.classList.remove('active');
   });
-
-  // Populate dept dropdown on main page
-  populateDeptDropdown();
-
-  // Render everything
-  renderAll();
-
-  // Close dept dropdown on outside click
-  document.addEventListener('click', (e) => {
-    const wrap = document.getElementById('deptDropdownWrap');
-    if (wrap && !wrap.contains(e.target)) {
-      wrap.classList.remove('open');
-    }
-  });
-
-  // Scroll spy for nav links
-  setupScrollSpy();
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
 }
 
-/* ═══════════════════════════
-   RENDER ALL SECTIONS
-═══════════════════════════ */
-function renderAll() {
+
+/* ──────────────────────────────────────
+   SECTION 3: INITIALISATION
+   Fetches all data from PHP/MySQL on page load.
+   Shows an error message if the server is not running.
+────────────────────────────────────── */
+
+/**
+ * init() — entry point. Loads all data from the database.
+ */
+async function init() {
+
+  /* Show a loading message while data is being fetched */
+  document.getElementById('eventsGrid').innerHTML = '<div class="empty-state"><p>⏳ Loading events from database...</p></div>';
+  document.getElementById('clubsGrid').innerHTML = '<div class="empty-state"><p>⏳ Loading clubs...</p></div>';
+
+  /* Step 1: Fetch departments from MySQL */
+  const deptOk = await loadDepartments();
+
+  if (!deptOk) {
+    /* If departments can't be loaded, the DB is unreachable — show error and stop */
+    const errMsg = '<div class="empty-state"><p>❌ Cannot connect to database.<br>Please start XAMPP and make sure MySQL is running.</p></div>';
+    document.getElementById('eventsGrid').innerHTML = errMsg;
+    document.getElementById('clubsGrid').innerHTML = errMsg;
+    return; /* Stop further execution */
+  }
+
+  /* Step 2: Populate department dropdowns now that we have the data */
+  populateDeptDropdowns();
+
+  /* Step 3: Fetch clubs and events in parallel using Promise.all() */
+  await Promise.all([loadClubs(), loadEvents()]);
+
+  /* Step 4: Render everything on screen */
   renderEvents();
   renderClubs();
-  renderCalendar();
+  updateStats();
 }
 
-/* ═══════════════════════════
-   DEPARTMENT DROPDOWN
-═══════════════════════════ */
-function populateDeptDropdown() {
-  const menu = document.getElementById('deptDropdownMenu');
-  // Keep the "All Departments" item, add the rest
-  let html = `<div class="dept-dropdown-item active" data-dept="all" onclick="selectDept(this, 'all')">
-    <span>🏫</span> All Departments
-  </div>`;
-  DEPARTMENTS.forEach(d => {
-    html += `<div class="dept-dropdown-item" data-dept="${d.id}" onclick="selectDept(this, '${d.id}')">
-      <span>${DEPT_EMOJIS[d.id] || '📚'}</span> ${d.name}
-      <span class="dept-short-tag">${d.short}</span>
-    </div>`;
-  });
-  menu.innerHTML = html;
+/* ── Individual data loaders ── */
+
+/**
+ * loadDepartments() — fetches departments from get_departments.php
+ * Returns true on success, false on failure.
+ */
+async function loadDepartments() {
+  try {
+    const response = await fetch('php/get_departments.php');
+    const data = await response.json();
+    if (data.success) {
+      departments = data.departments; /* Store in local array */
+      return true;
+    }
+    return false;
+  } catch (error) {
+    /* fetch() throws if PHP file not found or server is offline */
+    console.error('loadDepartments failed:', error);
+    return false;
+  }
 }
 
-function toggleDeptDropdown() {
-  const wrap = document.getElementById('deptDropdownWrap');
-  wrap.classList.toggle('open');
+/**
+ * loadClubs() — fetches all clubs from get_clubs.php
+ */
+async function loadClubs() {
+  try {
+    const response = await fetch('php/get_clubs.php');
+    const data = await response.json();
+    if (data.success) clubs = data.clubs;
+  } catch (error) {
+    console.error('loadClubs failed:', error);
+  }
 }
 
-function selectDept(el, deptId) {
-  currentDept = deptId;
+/**
+ * loadEvents() — fetches all events from get_events.php
+ */
+async function loadEvents() {
+  try {
+    const response = await fetch('php/get_events.php');
+    const data = await response.json();
+    if (data.success) events = data.events;
+  } catch (error) {
+    console.error('loadEvents failed:', error);
+  }
+}
 
-  // Update active state in dropdown
-  document.querySelectorAll('.dept-dropdown-item').forEach(item => item.classList.remove('active'));
-  el.classList.add('active');
 
-  // Update button label
-  const label = document.getElementById('deptDropdownLabel');
-  if (deptId === 'all') {
-    label.textContent = 'All Departments';
-  } else {
-    const dept = DEPARTMENTS.find(d => d.id === deptId);
-    label.textContent = dept ? dept.name : 'All Departments';
+/* ──────────────────────────────────────
+   SECTION 4: POPULATE DEPT DROPDOWNS
+   Builds <option> elements from the departments array (fetched from DB)
+────────────────────────────────────── */
+
+function populateDeptDropdowns() {
+  /* Filter dropdown on the home page */
+  const filterSelect = document.getElementById('filterDept');
+  if (filterSelect) {
+    filterSelect.innerHTML = '<option value="all">All Departments</option>';
+    departments.forEach(function (dept) {
+      var option = document.createElement('option');
+      option.value = dept.id;
+      option.textContent = dept.name;
+      filterSelect.appendChild(option);
+    });
   }
 
-  // Close dropdown
-  document.getElementById('deptDropdownWrap').classList.remove('open');
+  /* Department dropdown on the login page */
+  const loginSelect = document.getElementById('loginDept');
+  if (loginSelect) {
+    loginSelect.innerHTML = '<option value="">Select your department...</option>';
+    departments.forEach(function (dept) {
+      var option = document.createElement('option');
+      option.value = dept.id;
+      option.textContent = dept.name;
+      loginSelect.appendChild(option);
+    });
+  }
+}
 
-  renderEvents();
-}
- 
-function setStatus(el) {
-  currentStatus = el.dataset.s;
-  document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  renderEvents();
-}
- 
-function getFiltered() {
-  const q = document.getElementById('searchInput').value.toLowerCase();
-  return events.filter(e => {
-    const club = clubs.find(c => c.id === e.club);
-    const dept = DEPARTMENTS.find(d => d.id === e.dept);
-    const matchDept = currentDept === 'all' || e.dept === currentDept;
-    const matchStatus = currentStatus === 'all' || e.status === currentStatus;
-    const matchQ = !q || e.title.toLowerCase().includes(q)
-      || (club && club.name.toLowerCase().includes(q))
-      || (dept && dept.name.toLowerCase().includes(q))
-      || e.desc.toLowerCase().includes(q);
-    return matchDept && matchStatus && matchQ;
-  });
-}
- 
-function renderEvents() {
-  const filtered = getFiltered();
-  const grid = document.getElementById('evGrid');
- 
-  // Stats
-  const ongoing = events.filter(e => e.status === 'ongoing').length;
-  const upcoming = events.filter(e => e.status === 'upcoming').length;
-  document.getElementById('stat-on').textContent = ongoing;
-  document.getElementById('stat-up').textContent = upcoming + '+';
-  document.getElementById('stat-clubs').textContent = clubs.length;
-  document.getElementById('evCount').textContent = filtered.length + ' event' + (filtered.length !== 1 ? 's' : '');
- 
-  if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-state">
-      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <h3>No events found</h3>
-      <p>Try a different department, status filter, or search term.</p>
-    </div>`;
+
+/* ──────────────────────────────────────
+   SECTION 5: RENDER EVENTS
+   Builds event cards from the events array (fetched from DB)
+────────────────────────────────────── */
+
+/**
+ * renderEvents(list) — renders event cards.
+ * @param {Array} list — optional filtered subset; defaults to all events.
+ */
+function renderEvents(list) {
+  const display = list || events;
+  const grid = document.getElementById('eventsGrid');
+
+  if (display.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><p>📭 No events found.</p></div>';
     return;
   }
- 
-  grid.innerHTML = filtered.map((e, i) => {
-    const club = clubs.find(c => c.id === e.club);
-    const dept = DEPARTMENTS.find(d => d.id === e.dept);
-    const bClass = e.status === 'ongoing' ? 'badge-ongoing' : e.status === 'upcoming' ? 'badge-upcoming' : 'badge-past';
-    const bLabel = e.status.charAt(0).toUpperCase() + e.status.slice(1);
-    const avH = [0,1,2].map(j => `<div class="av" style="background:${AV_COLORS[j%5]}">${AV_INIT[j%5]}</div>`).join('');
- 
-    return `<div class="event-card" style="animation-delay:${i*0.04}s" onclick="openModal(${e.id})">
-      <div class="card-banner ${e.color}">
-        <div class="card-dept-tag">${dept ? dept.short : ''}</div>
-        <span class="badge ${bClass}">${bLabel}</span>
-      </div>
-      <div class="card-body">
-        <div class="card-club">${club ? club.name : ''}</div>
-        <div class="card-title">${e.title}</div>
-        <div class="card-desc">${e.desc}</div>
-        <div class="card-meta">
-          <span class="meta-item">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            ${fmtDate(e.date)}
-          </span>
-          <span class="meta-item">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-            ${e.time}
-          </span>
-          <span class="meta-item">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            ${e.venue}
-          </span>
-        </div>
-      </div>
-      <div class="card-footer">
-        <div class="rsvp-info">
-          <div class="avatars">${avH}</div>
-          <span>+${e.rsvp} RSVPs</span>
-        </div>
-        <button class="btn btn-primary btn-sm">Details</button>
-      </div>
-    </div>`;
+
+  grid.innerHTML = display.map(function (event) {
+    /* Find department short name from our departments array */
+    const dept = departments.find(function (d) { return d.id === event.dept_id; });
+    const deptShort = dept ? dept.short_name : event.dept_id.toUpperCase();
+
+    const badgeClass = 'badge-' + event.status;
+
+    return '<div class="event-card" onclick="openModal(' + event.id + ')">' +
+      '<div class="card-stripe ' + event.status + '"></div>' +
+      '<div class="card-body">' +
+      '<div class="card-dept">' + deptShort + ' Dept</div>' +
+      '<div class="card-club">' + (event.club_name || '') + '</div>' +
+      '<div class="card-title">' + event.title + '</div>' +
+      '<div class="card-desc">' + event.description + '</div>' +
+      '<div class="card-meta">' +
+      '<span>📅 ' + formatDate(event.event_date) + '</span>' +
+      '<span>🕐 ' + event.event_time + '</span>' +
+      '<span>📍 ' + event.venue + '</span>' +
+      '</div>' +
+      '</div>' +
+      '<div class="card-footer">' +
+      '<span class="badge ' + badgeClass + '">' + event.status + '</span>' +
+      '<span style="font-size:12px;color:var(--text-muted)">👥 ' + event.rsvp_count + ' RSVPs</span>' +
+      '</div>' +
+      '</div>';
   }).join('');
 }
 
-/* ═══════════════════════════
-   CLUBS SECTION
-═══════════════════════════ */
+
+/* ──────────────────────────────────────
+   SECTION 6: RENDER CLUBS
+   Builds club cards from the clubs array (fetched from DB)
+────────────────────────────────────── */
+
 function renderClubs() {
   const grid = document.getElementById('clubsGrid');
   if (!grid) return;
 
-  grid.innerHTML = clubs.map((c, i) => {
-    const dept = DEPARTMENTS.find(d => d.id === c.dept);
-    const evCount = events.filter(e => e.club === c.id).length;
-    const colorIdx = i % CLUB_AV_COLORS.length;
-    const catClass = 'club-cat-' + c.cat.toLowerCase();
-    const initials = c.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  if (clubs.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><p>📭 No clubs found.</p></div>';
+    return;
+  }
 
-    return `<div class="club-card" style="animation-delay:${i * 0.05}s">
-      <div class="club-card-header">
-        <div class="club-card-avatar" style="background:${CLUB_AV_COLORS[colorIdx]}">${initials}</div>
-        <div>
-          <div class="club-card-name">${c.name}</div>
-          <div class="club-card-dept">${dept ? dept.short + ' — ' + dept.name : ''}</div>
-        </div>
-      </div>
-      <div class="club-card-desc">${c.desc}</div>
-      <div class="club-card-footer">
-        <span class="club-card-cat ${catClass}">${c.cat}</span>
-        <span class="club-card-events-count">${evCount} event${evCount !== 1 ? 's' : ''}</span>
-      </div>
-    </div>`;
+  /* Avatar background colors — cycle through for variety */
+  var avatarColors = ['#1d4ed8', '#0891b2', '#7c3aed', '#059669', '#d97706', '#dc2626', '#0f766e', '#9333ea'];
+
+  grid.innerHTML = clubs.map(function (club, index) {
+    const dept = departments.find(function (d) { return d.id === club.dept_id; });
+    const deptLabel = dept ? dept.short_name + ' — ' + dept.name : club.dept_id;
+
+    /* Count events for this club from events array */
+    const evCount = events.filter(function (e) { return e.club_id == club.id; }).length;
+
+    /* First two initials of club name */
+    const initials = club.name.split(' ').map(function (w) { return w[0]; }).join('').substring(0, 2).toUpperCase();
+    const avatarColor = avatarColors[index % avatarColors.length];
+
+    return '<div class="club-card">' +
+      '<div class="club-card-header">' +
+      '<div class="club-avatar" style="background:' + avatarColor + '">' + initials + '</div>' +
+      '<div>' +
+      '<div class="club-name">' + club.name + '</div>' +
+      '<div class="club-dept-label">' + deptLabel + '</div>' +
+      '</div>' +
+      '</div>' +
+      '<div class="club-desc">' + club.description + '</div>' +
+      '<div class="club-card-footer">' +
+      '<span class="cat-badge">' + club.category + '</span>' +
+      '<span class="event-count-label">' + evCount + ' event' + (evCount !== 1 ? 's' : '') + '</span>' +
+      '</div>' +
+      '</div>';
   }).join('');
 }
 
-/* ═══════════════════════════
-   CALENDAR SECTION
-═══════════════════════════ */
-function renderCalendar() {
-  const grid = document.getElementById('calendarGrid');
-  const label = document.getElementById('calMonthLabel');
-  if (!grid || !label) return;
 
-  const year = calendarDate.getFullYear();
-  const month = calendarDate.getMonth();
-  const today = new Date();
+/* ──────────────────────────────────────
+   SECTION 7: UPDATE STATS
+────────────────────────────────────── */
 
-  label.textContent = calendarDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+function updateStats() {
+  document.getElementById('statEvents').textContent = events.length;
+  document.getElementById('statOngoing').textContent = events.filter(function (e) { return e.status === 'ongoing'; }).length;
+  document.getElementById('statClubs').textContent = clubs.length;
+}
 
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Build event lookup by date string
-  const eventsByDate = {};
-  events.forEach(e => {
-    if (!eventsByDate[e.date]) eventsByDate[e.date] = [];
-    eventsByDate[e.date].push(e);
+/* ──────────────────────────────────────
+   SECTION 8: FILTERING
+────────────────────────────────────── */
+
+/**
+ * applyFilter() — filters the events array and re-renders.
+ * Only operates on the in-memory array (no extra DB call needed).
+ */
+function applyFilter() {
+  const deptFilter = document.getElementById('filterDept').value;
+  const statusFilter = document.getElementById('filterStatus').value;
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+
+  var filtered = events.filter(function (event) {
+    var matchDept = (deptFilter === 'all') || (event.dept_id === deptFilter);
+    var matchStatus = (statusFilter === 'all') || (event.status === statusFilter);
+    var matchSearch = !searchTerm
+      || event.title.toLowerCase().includes(searchTerm)
+      || event.description.toLowerCase().includes(searchTerm)
+      || event.venue.toLowerCase().includes(searchTerm);
+    return matchDept && matchStatus && matchSearch;
   });
 
-  // Header row
-  let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
-    .map(d => `<div class="cal-header-cell">${d}</div>`).join('');
-
-  // Empty cells before first day
-  for (let i = 0; i < firstDay; i++) {
-    html += `<div class="cal-cell empty"></div>`;
-  }
-
-  // Day cells
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const dayEvents = eventsByDate[dateStr] || [];
-    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
-
-    let dotsHtml = '';
-    if (dayEvents.length) {
-      dotsHtml = '<div class="cal-dots">';
-      dayEvents.forEach(e => {
-        const dotClass = e.status === 'ongoing' ? 'cal-dot-ongoing' 
-                       : e.status === 'upcoming' ? 'cal-dot-upcoming' 
-                       : 'cal-dot-past';
-        dotsHtml += `<div class="cal-dot ${dotClass}" title="${e.title}"></div>`;
-      });
-      dotsHtml += '</div>';
-    }
-
-    const classes = ['cal-cell'];
-    if (isToday) classes.push('today');
-    if (dayEvents.length) classes.push('has-event');
-
-    html += `<div class="${classes.join(' ')}" ${dayEvents.length ? `onclick="showCalendarEvents('${dateStr}')"` : ''}>
-      <span class="cal-day-num">${day}</span>
-      ${dotsHtml}
-    </div>`;
-  }
-
-  grid.innerHTML = html;
+  renderEvents(filtered);
 }
 
-function changeMonth(delta) {
-  calendarDate.setMonth(calendarDate.getMonth() + delta);
-  renderCalendar();
-}
 
-function showCalendarEvents(dateStr) {
-  const dayEvents = events.filter(e => e.date === dateStr);
-  if (dayEvents.length === 1) {
-    openModal(dayEvents[0].id);
-  } else if (dayEvents.length > 1) {
-    // Open the first event's modal
-    openModal(dayEvents[0].id);
-  }
-}
+/* ──────────────────────────────────────
+   SECTION 9: MODAL (Event Detail + RSVP)
+────────────────────────────────────── */
 
-/* ═══════════════════════════
-   SCROLL SPY
-═══════════════════════════ */
-function setupScrollSpy() {
-  const sections = ['section-events', 'section-clubs', 'section-calendar', 'section-about'];
-  const navLinks = document.querySelectorAll('.nav-center .nav-link');
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        navLinks.forEach(link => {
-          link.classList.remove('active');
-          if (link.getAttribute('href') === '#' + id) {
-            link.classList.add('active');
-          }
-        });
-      }
-    });
-  }, { threshold: 0.3 });
-
-  sections.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
-}
- 
-/* ═══════════════════════════
-   MODAL
-═══════════════════════════ */
 function openModal(id) {
-  const e = events.find(ev => ev.id === id);
-  if (!e) return;
-  const club = clubs.find(c => c.id === e.club);
-  const dept = DEPARTMENTS.find(d => d.id === e.dept);
-  const bClass = e.status === 'ongoing' ? 'badge-ongoing' : e.status === 'upcoming' ? 'badge-upcoming' : 'badge-past';
-  document.getElementById('mBanner').className = 'modal-banner ' + e.color;
-  document.getElementById('mBadge').className = 'badge ' + bClass;
-  document.getElementById('mBadge').textContent = e.status.charAt(0).toUpperCase() + e.status.slice(1);
-  document.getElementById('mDept').textContent = dept ? dept.name : '';
-  document.getElementById('mClub').textContent = club ? club.name : '';
-  document.getElementById('mTitle').textContent = e.title;
-  document.getElementById('mDesc').textContent = e.desc;
-  document.getElementById('mDate').textContent = fmtDate(e.date);
-  document.getElementById('mTime').textContent = e.time;
-  document.getElementById('mVenue').textContent = e.venue;
-  document.getElementById('mRsvp').textContent = e.rsvp + ' registered';
+  const event = events.find(function (e) { return e.id == id; });
+  if (!event) return;
+
+  const dept = departments.find(function (d) { return d.id === event.dept_id; });
+
+  document.getElementById('modalDept').textContent = dept ? dept.name : '';
+  document.getElementById('modalTitle').textContent = event.title;
+  document.getElementById('modalDesc').textContent = event.description;
+  document.getElementById('modalDate').textContent = formatDate(event.event_date);
+  document.getElementById('modalTime').textContent = event.event_time;
+  document.getElementById('modalVenue').textContent = event.venue;
+  document.getElementById('modalRsvp').textContent = event.rsvp_count + ' students registered';
+  document.getElementById('rsvpEventId').value = event.id;
+
+  const badge = document.getElementById('modalBadge');
+  badge.textContent = event.status;
+  badge.className = 'badge badge-' + event.status;
+
+  /* Clear previous RSVP form values */
+  document.getElementById('rsvpName').value = '';
+  document.getElementById('rsvpEmail').value = '';
+
   document.getElementById('modal').classList.add('open');
 }
-function closeModal(ev) { if (ev.target === document.getElementById('modal')) closeModalD(); }
-function closeModalD() { document.getElementById('modal').classList.remove('open'); }
- 
-/* ═══════════════════════════
-   AUTH
-═══════════════════════════ */
-function doLogin() {
-  const dId   = document.getElementById('loginDept').value;
-  const coordId = document.getElementById('loginId').value.trim();
-  const pass  = document.getElementById('loginPass').value;
- 
-  const dept = DEPARTMENTS.find(d => d.id === dId);
-  if (!dept) return alert('Please select a department.');
-  if (!coordId) return alert('Please enter your Coordinator ID.');
-  if (!pass) return alert('Please enter your password.');
- 
-  if (coordId !== dept.coord_id || pass !== dept.pass) {
-    return alert('Invalid Coordinator ID or password. Please check your credentials.');
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function closeModalOnBg(event) {
+  if (event.target === document.getElementById('modal')) closeModal();
+}
+
+
+/* ──────────────────────────────────────
+   SECTION 10: RSVP SUBMISSION
+   POST to Java Servlet → Servlet inserts into rsvp table in MySQL
+────────────────────────────────────── */
+
+/**
+ * submitRSVP() — sends student name + email + event_id to RSVPServlet.
+ * The Servlet inserts the record into the rsvp table and increments rsvp_count.
+ */
+async function submitRSVP() {
+  var name = document.getElementById('rsvpName').value.trim();
+  var email = document.getElementById('rsvpEmail').value.trim();
+  var eventId = document.getElementById('rsvpEventId').value;
+
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!email) { alert('Please enter your email.'); return; }
+
+  /* Java Servlet URL — Apache Tomcat at port 8080 */
+  var servletURL = 'http://localhost:8080/college_events/RSVPServlet';
+
+  try {
+    /* HTTP POST to Java Servlet with URL-encoded body */
+    var response = await fetch(servletURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'event_id=' + eventId
+        + '&student_name=' + encodeURIComponent(name)
+        + '&student_email=' + encodeURIComponent(email)
+    });
+
+    var data = await response.json();
+
+    if (data.success) {
+      showToast('✅ Registered successfully!');
+      closeModal();
+      /* Reload events from DB to get the updated rsvp_count */
+      await loadEvents();
+      renderEvents();
+    } else {
+      showToast('❌ ' + (data.message || 'Registration failed.'));
+    }
+  } catch (error) {
+    /* Servlet not running — inform user */
+    showToast('⚠️ RSVP server offline. (Start Tomcat to enable RSVP)');
+    closeModal();
   }
- 
-  loggedIn = dept;
-  document.getElementById('navLoginBtn').style.display = 'none';
-  document.getElementById('navLogoutBtn').style.display = '';
+}
+
+
+/* ──────────────────────────────────────
+   SECTION 11: AUTHENTICATION
+   Login validated by PHP against the coordinators table in MySQL.
+   No local credential checking — DB is the only authority.
+────────────────────────────────────── */
+
+/**
+ * doLogin() — sends credentials to login.php which queries MySQL.
+ */
+async function doLogin() {
+  var deptId = document.getElementById('loginDept').value;
+  var coordId = document.getElementById('loginId').value.trim();
+  var password = document.getElementById('loginPass').value;
+
+  if (!deptId) { alert('Please select your department.'); return; }
+  if (!coordId) { alert('Please enter your Coordinator ID.'); return; }
+  if (!password) { alert('Please enter your password.'); return; }
+
+  try {
+    /* Send credentials to PHP as POST data */
+    var formData = new FormData();
+    formData.append('dept_id', deptId);
+    formData.append('coord_id', coordId);
+    formData.append('password', password);
+
+    var response = await fetch('php/login.php', { method: 'POST', body: formData });
+    var data = await response.json();
+
+    if (data.success) {
+      /* Find the full department object from our departments array */
+      loggedInDept = departments.find(function (d) { return d.id === data.dept_id; })
+        || { id: data.dept_id, name: data.dept_name, short_name: data.dept_id.toUpperCase() };
+      onLoginSuccess();
+    } else {
+      alert(data.message || 'Invalid credentials. Please try again.');
+    }
+  } catch (error) {
+    alert('Cannot reach the server. Make sure XAMPP is running.');
+  }
+}
+
+function onLoginSuccess() {
+  document.getElementById('btnLogin').style.display = 'none';
+  document.getElementById('btnLogout').style.display = '';
   renderDashboard();
   showPage('dashboard');
+  showToast('✅ Logged in — ' + loggedInDept.name);
 }
- 
+
 function doLogout() {
-  loggedIn = null;
-  document.getElementById('navLoginBtn').style.display = '';
-  document.getElementById('navLogoutBtn').style.display = 'none';
-  goHome();
+  loggedInDept = null;
+  document.getElementById('btnLogin').style.display = '';
+  document.getElementById('btnLogout').style.display = 'none';
+  showPage('home');
+  showToast('👋 Logged out.');
 }
- 
-/* ═══════════════════════════
-   DASHBOARD
-═══════════════════════════ */
+
+
+/* ──────────────────────────────────────
+   SECTION 12: DASHBOARD
+   Renders KPIs, club list, and events table for the logged-in dept
+────────────────────────────────────── */
+
 function renderDashboard() {
-  const d = loggedIn;
-  document.getElementById('dashTitle').textContent = d.name;
-  document.getElementById('dashDeptTag').textContent = d.short;
-  document.getElementById('dashSub').textContent = `Coordinator: ${d.coord_id} · Manage clubs & events`;
- 
-  const myClubs = clubs.filter(c => c.dept === d.id);
-  const myEvents = events.filter(e => e.dept === d.id);
- 
+  var dept = loggedInDept;
+
+  document.getElementById('dashTitle').textContent = dept.name + ' — Dashboard';
+  document.getElementById('dashSub').textContent = 'Manage your department\'s clubs and events';
+
+  /* Filter data for this department only */
+  var myClubs = clubs.filter(function (c) { return c.dept_id === dept.id; });
+  var myEvents = events.filter(function (e) { return e.dept_id === dept.id; });
+
+  /* KPI numbers */
   document.getElementById('kClubs').textContent = myClubs.length;
   document.getElementById('kEvents').textContent = myEvents.length;
-  document.getElementById('kOngoing').textContent = myEvents.filter(e => e.status === 'ongoing').length;
-  document.getElementById('kUpcoming').textContent = myEvents.filter(e => e.status === 'upcoming').length;
-  document.getElementById('kRsvp').textContent = myEvents.reduce((s, e) => s + e.rsvp, 0);
- 
-  // Clubs panel
-  const clubList = document.getElementById('dClubList');
-  if (!myClubs.length) {
-    clubList.innerHTML = `<div style="text-align:center;padding:28px 20px;color:var(--muted);font-size:13px">No clubs yet. Create your department's first club above!</div>`;
+  document.getElementById('kOngoing').textContent = myEvents.filter(function (e) { return e.status === 'ongoing'; }).length;
+  document.getElementById('kUpcoming').textContent = myEvents.filter(function (e) { return e.status === 'upcoming'; }).length;
+
+  /* Render clubs list */
+  var clubList = document.getElementById('dashClubList');
+  if (myClubs.length === 0) {
+    clubList.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:12px 0">No clubs yet. Create your first club above!</p>';
   } else {
-    clubList.innerHTML = myClubs.map(c => {
-      const evCount = events.filter(e => e.club === c.id).length;
-      return `<div class="club-row">
-        <div class="club-row-info">
-          <div class="club-row-name">${c.name}</div>
-          <div class="club-row-meta">${c.cat} · ${evCount} event${evCount !== 1 ? 's' : ''} · ${c.desc}</div>
-        </div>
-        <div class="club-row-actions">
-          <button class="tbtn del" onclick="deleteClub('${c.id}')">Delete</button>
-        </div>
-      </div>`;
+    clubList.innerHTML = myClubs.map(function (c) {
+      var evCount = events.filter(function (e) { return e.club_id == c.id; }).length;
+      return '<div class="club-row">' +
+        '<div>' +
+        '<div class="club-row-name">' + c.name + '</div>' +
+        '<div class="club-row-meta">' + c.category + ' · ' + evCount + ' event(s) · ' + c.description + '</div>' +
+        '</div>' +
+        '<button class="btn-danger" onclick="deleteClub(' + c.id + ')">Delete</button>' +
+        '</div>';
     }).join('');
   }
- 
-  // Club dropdown for events form
-  const clubSel = document.getElementById('nEvClub');
-  clubSel.innerHTML = myClubs.length
-    ? myClubs.map(c => `<option value="${c.id}">${c.name}</option>`).join('')
-    : `<option value="">No clubs — create a club first</option>`;
- 
-  // Events table
-  const tbody = document.getElementById('dEvTable');
-  if (!myEvents.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--muted)">No events yet. Post an event above!</td></tr>`;
+
+  /* Populate club <select> in the Post Event form */
+  var clubSelect = document.getElementById('newEvClub');
+  if (myClubs.length === 0) {
+    clubSelect.innerHTML = '<option value="">Create a club first</option>';
   } else {
-    tbody.innerHTML = myEvents.map(e => {
-      const c = clubs.find(cl => cl.id === e.club);
-      const bClass = e.status === 'ongoing' ? 'badge-ongoing' : e.status === 'upcoming' ? 'badge-upcoming' : 'badge-past';
-      return `<tr>
-        <td>${e.title}</td>
-        <td>${c ? c.name : '—'}</td>
-        <td>${fmtDate(e.date)}</td>
-        <td><span class="badge ${bClass}" style="font-size:10px;padding:2px 8px">${e.status}</span></td>
-        <td>${e.rsvp}</td>
-        <td>
-          <div class="table-btns">
-            <button class="tbtn del" onclick="deleteEvent(${e.id})">Delete</button>
-          </div>
-        </td>
-      </tr>`;
+    clubSelect.innerHTML = myClubs.map(function (c) {
+      return '<option value="' + c.id + '">' + c.name + '</option>';
+    }).join('');
+  }
+
+  /* Render events table */
+  var tbody = document.getElementById('dashEventBody');
+  if (myEvents.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text-muted)">No events yet. Post one above!</td></tr>';
+  } else {
+    tbody.innerHTML = myEvents.map(function (e) {
+      return '<tr>' +
+        '<td>' + e.title + '</td>' +
+        '<td>' + (e.club_name || '—') + '</td>' +
+        '<td>' + formatDate(e.event_date) + '</td>' +
+        '<td>' + e.venue + '</td>' +
+        '<td><span class="badge badge-' + e.status + '">' + e.status + '</span></td>' +
+        '<td><button class="btn-danger" onclick="deleteEvent(' + e.id + ')">Delete</button></td>' +
+        '</tr>';
     }).join('');
   }
 }
- 
-function setDTab(el, tab) {
-  dashTab = tab;
-  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('dpanel-clubs').style.display = tab === 'clubs' ? 'block' : 'none';
-  document.getElementById('dpanel-events').style.display = tab === 'events' ? 'block' : 'none';
+
+
+/* ──────────────────────────────────────
+   SECTION 13: TAB SWITCHING
+────────────────────────────────────── */
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+  document.getElementById('panel-clubs').style.display = (tabName === 'clubs') ? '' : 'none';
+  document.getElementById('panel-events').style.display = (tabName === 'events') ? '' : 'none';
+  document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
 }
- 
-/* ═══════════════════════════
-   CLUB CRUD
-═══════════════════════════ */
-function createClub() {
-  const name = document.getElementById('nClubName').value.trim();
-  const cat  = document.getElementById('nClubCat').value;
-  const desc = document.getElementById('nClubDesc').value.trim();
-  if (!name) return alert('Please enter a club name.');
-  if (clubs.find(c => c.name.toLowerCase() === name.toLowerCase() && c.dept === loggedIn.id)) {
-    return alert('A club with this name already exists in your department.');
+
+
+/* ──────────────────────────────────────
+   SECTION 14: CLUB CRUD
+   All operations go to PHP → MySQL.
+   After success, reload data from DB and re-render.
+────────────────────────────────────── */
+
+/**
+ * addClub() — sends new club data to add_club.php → INSERT into clubs table.
+ */
+async function addClub() {
+  var name = document.getElementById('newClubName').value.trim();
+  var cat = document.getElementById('newClubCat').value;
+  var desc = document.getElementById('newClubDesc').value.trim();
+
+  if (!name) { alert('Please enter a club name.'); return; }
+
+  try {
+    var formData = new FormData();
+    formData.append('name', name);
+    formData.append('category', cat);
+    formData.append('description', desc || name + ' club.');
+    formData.append('dept_id', loggedInDept.id);
+
+    var response = await fetch('php/add_club.php', { method: 'POST', body: formData });
+    var data = await response.json();
+
+    if (data.success) {
+      /* Clear form */
+      document.getElementById('newClubName').value = '';
+      document.getElementById('newClubDesc').value = '';
+
+      /* Reload clubs from DB — database is the source of truth */
+      await loadClubs();
+      renderDashboard();
+      renderClubs();
+      updateStats();
+      showToast('✅ Club "' + name + '" created!');
+    } else {
+      alert(data.message || 'Failed to create club.');
+    }
+  } catch (error) {
+    alert('Server error. Make sure XAMPP is running.');
   }
-  clubs.push({ id: 'c' + Date.now(), dept: loggedIn.id, name, cat, desc: desc || name + ' club.' });
-  clearClubForm();
-  renderDashboard();
-  renderClubs();
-  toast('Club "' + name + '" created!');
 }
- 
-function deleteClub(id) {
+
+/**
+ * deleteClub(id) — calls delete_club.php → DELETE from MySQL.
+ */
+async function deleteClub(id) {
   if (!confirm('Delete this club and all its events?')) return;
-  clubs = clubs.filter(c => c.id !== id);
-  events = events.filter(e => e.club !== id);
-  renderDashboard();
-  renderClubs();
-  renderCalendar();
-  toast('Club deleted.');
+
+  try {
+    var formData = new FormData();
+    formData.append('id', id);
+
+    var response = await fetch('php/delete_club.php', { method: 'POST', body: formData });
+    var data = await response.json();
+
+    if (data.success) {
+      /* Reload both clubs and events from DB (events cascade-deleted) */
+      await Promise.all([loadClubs(), loadEvents()]);
+      renderDashboard();
+      renderClubs();
+      renderEvents();
+      updateStats();
+      showToast('Club deleted.');
+    } else {
+      alert(data.message || 'Delete failed.');
+    }
+  } catch (error) {
+    alert('Server error. Make sure XAMPP is running.');
+  }
 }
- 
-function clearClubForm() {
-  document.getElementById('nClubName').value = '';
-  document.getElementById('nClubDesc').value = '';
+
+
+/* ──────────────────────────────────────
+   SECTION 15: EVENT CRUD
+   All operations go to PHP → MySQL.
+────────────────────────────────────── */
+
+/**
+ * addEvent() — sends new event data to add_event.php → INSERT into events table.
+ */
+async function addEvent() {
+  var title = document.getElementById('newEvTitle').value.trim();
+  var clubId = document.getElementById('newEvClub').value;
+  var date = document.getElementById('newEvDate').value;
+  var time = document.getElementById('newEvTime').value;
+  var venue = document.getElementById('newEvVenue').value.trim();
+  var status = document.getElementById('newEvStatus').value;
+  var desc = document.getElementById('newEvDesc').value.trim();
+
+  if (!title || !clubId || !date || !venue) {
+    alert('Please fill in Title, Club, Date, and Venue.');
+    return;
+  }
+
+  /* Convert 24-hour time (e.g. "14:30") to 12-hour (e.g. "2:30 PM") */
+  var parts = time.split(':');
+  var hr = parseInt(parts[0]);
+  var min = parts[1];
+  var period = hr >= 12 ? 'PM' : 'AM';
+  var hr12 = hr > 12 ? hr - 12 : (hr === 0 ? 12 : hr);
+  var fmtTime = hr12 + ':' + min + ' ' + period;
+
+  try {
+    var formData = new FormData();
+    formData.append('title', title);
+    formData.append('club_id', clubId);
+    formData.append('dept_id', loggedInDept.id);
+    formData.append('event_date', date);
+    formData.append('event_time', fmtTime);
+    formData.append('venue', venue);
+    formData.append('status', status);
+    formData.append('description', desc || 'Event by ' + loggedInDept.name + '.');
+
+    var response = await fetch('php/add_event.php', { method: 'POST', body: formData });
+    var data = await response.json();
+
+    if (data.success) {
+      /* Clear event form */
+      ['newEvTitle', 'newEvDate', 'newEvVenue', 'newEvDesc'].forEach(function (id) {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('newEvTime').value = '10:00';
+
+      /* Reload events from DB */
+      await loadEvents();
+      renderDashboard();
+      renderEvents();
+      updateStats();
+      showToast('✅ Event "' + title + '" posted!');
+    } else {
+      alert(data.message || 'Failed to post event.');
+    }
+  } catch (error) {
+    alert('Server error. Make sure XAMPP is running.');
+  }
 }
- 
-/* ═══════════════════════════
-   EVENT CRUD
-═══════════════════════════ */
-function postEvent() {
-  const title  = document.getElementById('nEvTitle').value.trim();
-  const clubId = document.getElementById('nEvClub').value;
-  const date   = document.getElementById('nEvDate').value;
-  const time   = document.getElementById('nEvTime').value;
-  const venue  = document.getElementById('nEvVenue').value.trim();
-  const status = document.getElementById('nEvStatus').value;
-  const desc   = document.getElementById('nEvDesc').value.trim();
- 
-  if (!title || !clubId || !date || !venue) return alert('Please fill in Title, Club, Date, and Venue.');
-  if (!clubs.find(c => c.id === clubId)) return alert('Please create a club first before posting an event.');
- 
-  const hr = parseInt(time.split(':')[0]);
-  const min = time.split(':')[1];
-  const period = hr >= 12 ? 'PM' : 'AM';
-  const hr12 = hr > 12 ? hr - 12 : (hr === 0 ? 12 : hr);
-  const fTime = hr12 + ':' + min + ' ' + period;
- 
-  events.push({
-    id: Date.now(), dept: loggedIn.id, club: clubId,
-    title, desc: desc || 'Event by ' + loggedIn.name + '.',
-    date, time: fTime, venue, status, rsvp: 0, color: selectedColor
-  });
-  clearEvForm();
-  renderDashboard();
-  renderEvents();
-  renderCalendar();
-  toast('Event "' + title + '" posted!');
-}
- 
-function deleteEvent(id) {
+
+/**
+ * deleteEvent(id) — calls delete_event.php → DELETE from MySQL.
+ */
+async function deleteEvent(id) {
   if (!confirm('Delete this event?')) return;
-  events = events.filter(e => e.id !== id);
-  renderDashboard();
-  renderEvents();
-  renderCalendar();
-  toast('Event deleted.');
+
+  try {
+    var formData = new FormData();
+    formData.append('id', id);
+
+    var response = await fetch('php/delete_event.php', { method: 'POST', body: formData });
+    var data = await response.json();
+
+    if (data.success) {
+      /* Reload events from DB */
+      await loadEvents();
+      renderDashboard();
+      renderEvents();
+      updateStats();
+      showToast('Event deleted.');
+    } else {
+      alert(data.message || 'Delete failed.');
+    }
+  } catch (error) {
+    alert('Server error. Make sure XAMPP is running.');
+  }
 }
- 
-function clearEvForm() {
-  ['nEvTitle','nEvDate','nEvVenue','nEvDesc'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('nEvTime').value = '10:00';
+
+
+/* ──────────────────────────────────────
+   SECTION 16: UTILITY FUNCTIONS
+────────────────────────────────────── */
+
+/**
+ * formatDate("2026-04-15") → "15 Apr 2026"
+ */
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric'
+  });
 }
- 
-function pickColor(el) {
-  document.querySelectorAll('.cp').forEach(c => c.classList.remove('sel'));
-  el.classList.add('sel');
-  selectedColor = el.dataset.c;
+
+/**
+ * showToast(message) — shows a brief notification at bottom-right for 3 seconds.
+ */
+function showToast(message) {
+  var toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(function () { toast.classList.remove('show'); }, 3000);
 }
- 
-/* ═══════════════════════════
-   UTILS
-═══════════════════════════ */
-function fmtDate(d) {
-  return new Date(d).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
-}
- 
-function toast(msg) {
-  document.getElementById('toastMsg').textContent = msg;
-  const t = document.getElementById('toast');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
- 
-/* ═══ INIT ═══ */
+
+
+/* ──────────────────────────────────────
+   START — Run init() on page load
+────────────────────────────────────── */
 init();
