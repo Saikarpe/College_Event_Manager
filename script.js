@@ -1,36 +1,9 @@
-/* ============================================================
-   CampusConnect — script.js
-   College Event Management (with_DB version)
-
-   ALL DATA COMES FROM MySQL DATABASE via PHP APIs.
-   No hardcoded clubs or events — the database is the single source of truth.
-
-   Flow:
-     1. Page loads → init() runs
-     2. init() fetches departments, clubs, events from PHP
-     3. Data is stored in JS arrays TEMPORARILY (for rendering only)
-     4. Any add/delete operation calls PHP → updates MySQL → refreshes local arrays
-============================================================ */
+let departments = [];
+let clubs = [];
+let events = [];
+let loggedInDept = null;
 
 
-/* ──────────────────────────────────────
-   SECTION 1: STATE VARIABLES
-   These start EMPTY — filled by PHP API calls in init()
-────────────────────────────────────── */
-
-let departments = [];   /* Filled by get_departments.php */
-let clubs = [];   /* Filled by get_clubs.php       */
-let events = [];   /* Filled by get_events.php      */
-let loggedInDept = null; /* Set after successful login    */
-
-
-/* ──────────────────────────────────────
-   SECTION 2: PAGE ROUTING
-────────────────────────────────────── */
-
-/**
- * showPage(name) — shows page-{name} and hides all others.
- */
 function showPage(name) {
   document.querySelectorAll('.page').forEach(function (page) {
     page.classList.remove('active');
@@ -39,70 +12,44 @@ function showPage(name) {
   window.scrollTo(0, 0);
 }
 
-
-/* ──────────────────────────────────────
-   SECTION 3: INITIALISATION
-   Fetches all data from PHP/MySQL on page load.
-   Shows an error message if the server is not running.
-────────────────────────────────────── */
-
-/**
- * init() — entry point. Loads all data from the database.
- */
 async function init() {
 
-  /* Show a loading message while data is being fetched */
   document.getElementById('eventsGrid').innerHTML = '<div class="empty-state"><p>⏳ Loading events from database...</p></div>';
   document.getElementById('clubsGrid').innerHTML = '<div class="empty-state"><p>⏳ Loading clubs...</p></div>';
 
-  /* Step 1: Fetch departments from MySQL */
   const deptOk = await loadDepartments();
 
   if (!deptOk) {
-    /* If departments can't be loaded, the DB is unreachable — show error and stop */
     const errMsg = '<div class="empty-state"><p>❌ Cannot connect to database.<br>Please start XAMPP and make sure MySQL is running.</p></div>';
     document.getElementById('eventsGrid').innerHTML = errMsg;
     document.getElementById('clubsGrid').innerHTML = errMsg;
-    return; /* Stop further execution */
+    return;
   }
 
-  /* Step 2: Populate department dropdowns now that we have the data */
   populateDeptDropdowns();
 
-  /* Step 3: Fetch clubs and events in parallel using Promise.all() */
   await Promise.all([loadClubs(), loadEvents()]);
 
-  /* Step 4: Render everything on screen */
   renderEvents();
   renderClubs();
   updateStats();
 }
 
-/* ── Individual data loaders ── */
-
-/**
- * loadDepartments() — fetches departments from get_departments.php
- * Returns true on success, false on failure.
- */
 async function loadDepartments() {
   try {
     const response = await fetch('php/get_departments.php');
     const data = await response.json();
     if (data.success) {
-      departments = data.departments; /* Store in local array */
+      departments = data.departments;
       return true;
     }
     return false;
   } catch (error) {
-    /* fetch() throws if PHP file not found or server is offline */
     console.error('loadDepartments failed:', error);
     return false;
   }
 }
 
-/**
- * loadClubs() — fetches all clubs from get_clubs.php
- */
 async function loadClubs() {
   try {
     const response = await fetch('php/get_clubs.php');
@@ -113,9 +60,6 @@ async function loadClubs() {
   }
 }
 
-/**
- * loadEvents() — fetches all events from get_events.php
- */
 async function loadEvents() {
   try {
     const response = await fetch('php/get_events.php');
@@ -127,13 +71,7 @@ async function loadEvents() {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 4: POPULATE DEPT DROPDOWNS
-   Builds <option> elements from the departments array (fetched from DB)
-────────────────────────────────────── */
-
 function populateDeptDropdowns() {
-  /* Filter dropdown on the home page */
   const filterSelect = document.getElementById('filterDept');
   if (filterSelect) {
     filterSelect.innerHTML = '<option value="all">All Departments</option>';
@@ -145,7 +83,6 @@ function populateDeptDropdowns() {
     });
   }
 
-  /* Department dropdown on the login page */
   const loginSelect = document.getElementById('loginDept');
   if (loginSelect) {
     loginSelect.innerHTML = '<option value="">Select your department...</option>';
@@ -159,15 +96,6 @@ function populateDeptDropdowns() {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 5: RENDER EVENTS
-   Builds event cards from the events array (fetched from DB)
-────────────────────────────────────── */
-
-/**
- * renderEvents(list) — renders event cards.
- * @param {Array} list — optional filtered subset; defaults to all events.
- */
 function renderEvents(list) {
   const display = list || events;
   const grid = document.getElementById('eventsGrid');
@@ -178,7 +106,6 @@ function renderEvents(list) {
   }
 
   grid.innerHTML = display.map(function (event) {
-    /* Find department short name from our departments array */
     const dept = departments.find(function (d) { return d.id === event.dept_id; });
     const deptShort = dept ? dept.short_name : event.dept_id.toUpperCase();
 
@@ -206,11 +133,6 @@ function renderEvents(list) {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 6: RENDER CLUBS
-   Builds club cards from the clubs array (fetched from DB)
-────────────────────────────────────── */
-
 function renderClubs() {
   const grid = document.getElementById('clubsGrid');
   if (!grid) return;
@@ -220,17 +142,14 @@ function renderClubs() {
     return;
   }
 
-  /* Avatar background colors — cycle through for variety */
   var avatarColors = ['#1d4ed8', '#0891b2', '#7c3aed', '#059669', '#d97706', '#dc2626', '#0f766e', '#9333ea'];
 
   grid.innerHTML = clubs.map(function (club, index) {
     const dept = departments.find(function (d) { return d.id === club.dept_id; });
     const deptLabel = dept ? dept.short_name + ' — ' + dept.name : club.dept_id;
 
-    /* Count events for this club from events array */
     const evCount = events.filter(function (e) { return e.club_id == club.id; }).length;
 
-    /* First two initials of club name */
     const initials = club.name.split(' ').map(function (w) { return w[0]; }).join('').substring(0, 2).toUpperCase();
     const avatarColor = avatarColors[index % avatarColors.length];
 
@@ -252,10 +171,6 @@ function renderClubs() {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 7: UPDATE STATS
-────────────────────────────────────── */
-
 function updateStats() {
   document.getElementById('statEvents').textContent = events.length;
   document.getElementById('statOngoing').textContent = events.filter(function (e) { return e.status === 'ongoing'; }).length;
@@ -263,14 +178,6 @@ function updateStats() {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 8: FILTERING
-────────────────────────────────────── */
-
-/**
- * applyFilter() — filters the events array and re-renders.
- * Only operates on the in-memory array (no extra DB call needed).
- */
 function applyFilter() {
   const deptFilter = document.getElementById('filterDept').value;
   const statusFilter = document.getElementById('filterStatus').value;
@@ -289,10 +196,6 @@ function applyFilter() {
   renderEvents(filtered);
 }
 
-
-/* ──────────────────────────────────────
-   SECTION 9: MODAL (Event Detail + RSVP)
-────────────────────────────────────── */
 
 function openModal(id) {
   const event = events.find(function (e) { return e.id == id; });
@@ -313,7 +216,6 @@ function openModal(id) {
   badge.textContent = event.status;
   badge.className = 'badge badge-' + event.status;
 
-  /* Clear previous RSVP form values */
   document.getElementById('rsvpName').value = '';
   document.getElementById('rsvpEmail').value = '';
 
@@ -329,15 +231,6 @@ function closeModalOnBg(event) {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 10: RSVP SUBMISSION
-   POST to Java Servlet → Servlet inserts into rsvp table in MySQL
-────────────────────────────────────── */
-
-/**
- * submitRSVP() — sends student name + email + event_id to RSVPServlet.
- * The Servlet inserts the record into the rsvp table and increments rsvp_count.
- */
 async function submitRSVP() {
   var name = document.getElementById('rsvpName').value.trim();
   var email = document.getElementById('rsvpEmail').value.trim();
@@ -346,11 +239,9 @@ async function submitRSVP() {
   if (!name) { alert('Please enter your name.'); return; }
   if (!email) { alert('Please enter your email.'); return; }
 
-  /* Java Servlet URL — Apache Tomcat at port 8080 */
-  var servletURL = 'http://localhost:8080/college_events/RSVPServlet';
+  var servletURL = 'php/submit_rsvp.php';
 
   try {
-    /* HTTP POST to Java Servlet with URL-encoded body */
     var response = await fetch(servletURL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -364,29 +255,18 @@ async function submitRSVP() {
     if (data.success) {
       showToast('✅ Registered successfully!');
       closeModal();
-      /* Reload events from DB to get the updated rsvp_count */
       await loadEvents();
       renderEvents();
     } else {
       showToast('❌ ' + (data.message || 'Registration failed.'));
     }
   } catch (error) {
-    /* Servlet not running — inform user */
-    showToast('⚠️ RSVP server offline. (Start Tomcat to enable RSVP)');
+    showToast('⚠️ RSVP server offline. (Is XAMPP running?)');
     closeModal();
   }
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 11: AUTHENTICATION
-   Login validated by PHP against the coordinators table in MySQL.
-   No local credential checking — DB is the only authority.
-────────────────────────────────────── */
-
-/**
- * doLogin() — sends credentials to login.php which queries MySQL.
- */
 async function doLogin() {
   var deptId = document.getElementById('loginDept').value;
   var coordId = document.getElementById('loginId').value.trim();
@@ -397,7 +277,6 @@ async function doLogin() {
   if (!password) { alert('Please enter your password.'); return; }
 
   try {
-    /* Send credentials to PHP as POST data */
     var formData = new FormData();
     formData.append('dept_id', deptId);
     formData.append('coord_id', coordId);
@@ -407,7 +286,6 @@ async function doLogin() {
     var data = await response.json();
 
     if (data.success) {
-      /* Find the full department object from our departments array */
       loggedInDept = departments.find(function (d) { return d.id === data.dept_id; })
         || { id: data.dept_id, name: data.dept_name, short_name: data.dept_id.toUpperCase() };
       onLoginSuccess();
@@ -436,28 +314,20 @@ function doLogout() {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 12: DASHBOARD
-   Renders KPIs, club list, and events table for the logged-in dept
-────────────────────────────────────── */
-
 function renderDashboard() {
   var dept = loggedInDept;
 
   document.getElementById('dashTitle').textContent = dept.name + ' — Dashboard';
   document.getElementById('dashSub').textContent = 'Manage your department\'s clubs and events';
 
-  /* Filter data for this department only */
   var myClubs = clubs.filter(function (c) { return c.dept_id === dept.id; });
   var myEvents = events.filter(function (e) { return e.dept_id === dept.id; });
 
-  /* KPI numbers */
   document.getElementById('kClubs').textContent = myClubs.length;
   document.getElementById('kEvents').textContent = myEvents.length;
   document.getElementById('kOngoing').textContent = myEvents.filter(function (e) { return e.status === 'ongoing'; }).length;
   document.getElementById('kUpcoming').textContent = myEvents.filter(function (e) { return e.status === 'upcoming'; }).length;
 
-  /* Render clubs list */
   var clubList = document.getElementById('dashClubList');
   if (myClubs.length === 0) {
     clubList.innerHTML = '<p style="color:var(--text-muted);font-size:13px;padding:12px 0">No clubs yet. Create your first club above!</p>';
@@ -474,7 +344,6 @@ function renderDashboard() {
     }).join('');
   }
 
-  /* Populate club <select> in the Post Event form */
   var clubSelect = document.getElementById('newEvClub');
   if (myClubs.length === 0) {
     clubSelect.innerHTML = '<option value="">Create a club first</option>';
@@ -484,7 +353,6 @@ function renderDashboard() {
     }).join('');
   }
 
-  /* Render events table */
   var tbody = document.getElementById('dashEventBody');
   if (myEvents.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--text-muted)">No events yet. Post one above!</td></tr>';
@@ -503,10 +371,6 @@ function renderDashboard() {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 13: TAB SWITCHING
-────────────────────────────────────── */
-
 function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
   document.getElementById('panel-clubs').style.display = (tabName === 'clubs') ? '' : 'none';
@@ -515,15 +379,6 @@ function switchTab(tabName) {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 14: CLUB CRUD
-   All operations go to PHP → MySQL.
-   After success, reload data from DB and re-render.
-────────────────────────────────────── */
-
-/**
- * addClub() — sends new club data to add_club.php → INSERT into clubs table.
- */
 async function addClub() {
   var name = document.getElementById('newClubName').value.trim();
   var cat = document.getElementById('newClubCat').value;
@@ -542,11 +397,9 @@ async function addClub() {
     var data = await response.json();
 
     if (data.success) {
-      /* Clear form */
       document.getElementById('newClubName').value = '';
       document.getElementById('newClubDesc').value = '';
 
-      /* Reload clubs from DB — database is the source of truth */
       await loadClubs();
       renderDashboard();
       renderClubs();
@@ -560,9 +413,6 @@ async function addClub() {
   }
 }
 
-/**
- * deleteClub(id) — calls delete_club.php → DELETE from MySQL.
- */
 async function deleteClub(id) {
   if (!confirm('Delete this club and all its events?')) return;
 
@@ -574,7 +424,6 @@ async function deleteClub(id) {
     var data = await response.json();
 
     if (data.success) {
-      /* Reload both clubs and events from DB (events cascade-deleted) */
       await Promise.all([loadClubs(), loadEvents()]);
       renderDashboard();
       renderClubs();
@@ -590,14 +439,6 @@ async function deleteClub(id) {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 15: EVENT CRUD
-   All operations go to PHP → MySQL.
-────────────────────────────────────── */
-
-/**
- * addEvent() — sends new event data to add_event.php → INSERT into events table.
- */
 async function addEvent() {
   var title = document.getElementById('newEvTitle').value.trim();
   var clubId = document.getElementById('newEvClub').value;
@@ -612,7 +453,6 @@ async function addEvent() {
     return;
   }
 
-  /* Convert 24-hour time (e.g. "14:30") to 12-hour (e.g. "2:30 PM") */
   var parts = time.split(':');
   var hr = parseInt(parts[0]);
   var min = parts[1];
@@ -635,13 +475,11 @@ async function addEvent() {
     var data = await response.json();
 
     if (data.success) {
-      /* Clear event form */
       ['newEvTitle', 'newEvDate', 'newEvVenue', 'newEvDesc'].forEach(function (id) {
         document.getElementById(id).value = '';
       });
       document.getElementById('newEvTime').value = '10:00';
 
-      /* Reload events from DB */
       await loadEvents();
       renderDashboard();
       renderEvents();
@@ -655,9 +493,6 @@ async function addEvent() {
   }
 }
 
-/**
- * deleteEvent(id) — calls delete_event.php → DELETE from MySQL.
- */
 async function deleteEvent(id) {
   if (!confirm('Delete this event?')) return;
 
@@ -669,7 +504,6 @@ async function deleteEvent(id) {
     var data = await response.json();
 
     if (data.success) {
-      /* Reload events from DB */
       await loadEvents();
       renderDashboard();
       renderEvents();
@@ -684,13 +518,6 @@ async function deleteEvent(id) {
 }
 
 
-/* ──────────────────────────────────────
-   SECTION 16: UTILITY FUNCTIONS
-────────────────────────────────────── */
-
-/**
- * formatDate("2026-04-15") → "15 Apr 2026"
- */
 function formatDate(dateStr) {
   if (!dateStr) return '';
   return new Date(dateStr).toLocaleDateString('en-IN', {
@@ -698,9 +525,6 @@ function formatDate(dateStr) {
   });
 }
 
-/**
- * showToast(message) — shows a brief notification at bottom-right for 3 seconds.
- */
 function showToast(message) {
   var toast = document.getElementById('toast');
   toast.textContent = message;
@@ -709,7 +533,4 @@ function showToast(message) {
 }
 
 
-/* ──────────────────────────────────────
-   START — Run init() on page load
-────────────────────────────────────── */
 init();

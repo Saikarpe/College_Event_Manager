@@ -1,53 +1,19 @@
-/* ============================================================
-   CampusConnect — style.css
-   College Event Management — Web Technologies Mini Project
-
-   LAYOUT APPROACH: CSS Flexbox is used throughout this stylesheet.
-   Key Flexbox properties used:
-     display: flex        — enables flexbox on a container
-     flex-direction       — row (horizontal) or column (vertical)
-     flex-wrap: wrap      — allows items to wrap to the next line
-     justify-content      — alignment along the MAIN axis
-     align-items          — alignment along the CROSS axis
-     flex: 1              — shorthand for flex-grow, flex-shrink, flex-basis
-     gap                  — spacing between flex items
-============================================================ */
-
-
-/* ──────────────────────────────────────
-   1. CSS VARIABLES (Design Tokens)
-   All colors and sizes defined in one place.
-   Change a variable here → changes everywhere.
-────────────────────────────────────── */
 :root {
   --primary: #1d4ed8;
-  /* Blue — main brand color       */
   --primary-dark: #1e40af;
-  /* Darker blue — hover state     */
   --primary-light: #eff6ff;
-  /* Light blue — badge background */
   --success: #16a34a;
-  /* Green  — ongoing events       */
   --warning: #b45309;
-  /* Amber  — upcoming events      */
   --text: #1e293b;
-  /* Dark   — main text            */
   --text-muted: #64748b;
-  /* Gray   — secondary text       */
   --border: #e2e8f0;
-  /* Light gray — borders          */
   --bg: #f1f5f9;
-  /* Page background               */
   --surface: #ffffff;
-  /* Card / panel backgrounds      */
   --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   --radius: 8px;
 }
 
 
-/* ──────────────────────────────────────
-   2. RESET & BASE
-────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
@@ -68,11 +34,6 @@ a {
 }
 
 
-/* ──────────────────────────────────────
-   3. NAVIGATION BAR
-   Flex container: items arranged in a ROW.
-   space-between pushes logo left, links center, actions right.
-────────────────────────────────────── */
 #navbar {
   position: sticky;
   top: 0;
@@ -81,13 +42,9 @@ a {
   border-bottom: 2px solid var(--border);
 
   display: flex;
-  /* Enable flexbox */
   flex-direction: row;
-  /* Arrange children left → right */
   align-items: center;
-  /* Vertically center all items */
   justify-content: space-between;
-  /* Logo | Links | Buttons */
 
   padding: 0 36px;
   height: 62px;
@@ -97,19 +54,14 @@ a {
   font-size: 18px;
   font-weight: 700;
   color: var(--primary);
-
-  /* Flex item: don't shrink below its natural size */
   flex-shrink: 0;
 }
 
-/* Center nav links */
 .nav-links {
   display: flex;
-  /* Flex row for the links */
   flex-direction: row;
   align-items: center;
   gap: 32px;
-  /* Space between each link */
 }
 
 .nav-links a {
@@ -123,22 +75,15 @@ a {
   color: var(--primary);
 }
 
-/* Right side buttons */
 .nav-actions {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 8px;
-
   flex-shrink: 0;
-  /* Don't shrink when window is narrow */
 }
 
 
-/* ──────────────────────────────────────
-   4. PAGE SYSTEM
-   Only .page.active is visible.
-────────────────────────────────────── */
 .page {
   display: none;
 }
@@ -149,10 +94,6 @@ a {
 }
 
 
-/* ──────────────────────────────────────
-   5. HERO SECTION
-   Flex column: title, subtitle, stats stacked vertically + centered.
-────────────────────────────────────── */
 .hero {
   background: linear-gradient(135deg, #1d4ed8, #3b82f6);
   color: white;
@@ -160,9 +101,7 @@ a {
 
   display: flex;
   flex-direction: column;
-  /* Stack children top → bottom */
   align-items: center;
-  /* Center horizontally */
   text-align: center;
   gap: 12px;
 }
@@ -178,11 +117,9 @@ a {
   max-width: 520px;
 }
 
-/* Stats bar — flex row inside the hero */
 .hero-stats {
   display: flex;
   flex-direction: row;
-  /* Stats side by side */
   align-items: center;
   margin-top: 20px;
   background: rgba(255, 255, 255, 0.15);
@@ -194,7 +131,6 @@ a {
 .stat-item {
   display: flex;
   flex-direction: column;
-  /* Number on top, label below */
   align-items: center;
   padding: 0 28px;
   gap: 2px;
@@ -212,7 +148,6 @@ a {
   letter-spacing: 0.05em;
 }
 
-/* Vertical divider between stat items */
 .stat-divider {
   width: 1px;
   height: 44px;
@@ -221,9 +156,6 @@ a {
 }
 
 
-/* ──────────────────────────────────────
-   6. CONTENT SECTIONS
-────────────────────────────────────── */
 .section {
   max-width: 1200px;
   margin: 0 auto;
@@ -246,17 +178,11 @@ a {
 }
 
 
-/* ──────────────────────────────────────
-   7. FILTER BAR
-   Flex row: dropdown | dropdown | search — all in one line.
-   flex-wrap allows them to stack on small screens.
-────────────────────────────────────── */
 .filter-bar {
   display: flex;
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
-  /* Wrap to next line if screen is narrow */
   gap: 12px;
   margin-bottom: 28px;
 }
@@ -280,38 +206,26 @@ a {
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
 }
 
-/* Search input grows to fill remaining space */
 .filter-bar input[type="text"] {
   flex: 1;
-  /* flex-grow:1 — take all leftover width */
   min-width: 160px;
 }
 
 
-/* ──────────────────────────────────────
-   8. CARDS GRID (Events & Clubs)
-   Flex row with wrap — each card has a fixed width,
-   and they wrap naturally when the row is full.
-────────────────────────────────────── */
 .cards-grid {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  /* Cards wrap to next row when needed */
   gap: 20px;
 }
 
-/* Each card takes roughly 1/3 width; minimum 280px */
 .event-card,
 .club-card {
   flex: 1 1 280px;
-  /* grow: 1, shrink: 1, base width: 280px */
   max-width: calc(33.33% - 14px);
-  /* Max 3 per row on wide screens */
 }
 
 
-/* ── EVENT CARD ── */
 .event-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -321,7 +235,6 @@ a {
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
 
-  /* Flex column: stripe → body → footer stacked vertically */
   display: flex;
   flex-direction: column;
 }
@@ -331,7 +244,6 @@ a {
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
 }
 
-/* Colored top stripe indicating event status */
 .card-stripe {
   height: 5px;
   background: var(--primary);
@@ -350,14 +262,12 @@ a {
   background: #94a3b8;
 }
 
-/* Card body: flex column with padding */
 .card-body {
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
   flex: 1;
-  /* Grow to push footer to the bottom */
 }
 
 .card-dept {
@@ -382,14 +292,12 @@ a {
 .card-desc {
   font-size: 13px;
   color: var(--text-muted);
-  /* Limit description to 2 lines */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-top: auto;
 }
 
-/* Meta row: date | time | venue as flex items */
 .card-meta {
   display: flex;
   flex-direction: row;
@@ -402,20 +310,17 @@ a {
   margin-top: 8px;
 }
 
-/* Card footer: badge on left, RSVP count on right */
 .card-footer {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  /* Push items to edges */
   padding: 10px 16px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 
-/* ── STATUS BADGES (pill-shaped labels) ── */
 .badge {
   display: inline-block;
   padding: 2px 10px;
@@ -441,7 +346,6 @@ a {
 }
 
 
-/* ── CLUB CARD ── */
 .club-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -451,20 +355,16 @@ a {
 
   display: flex;
   flex-direction: column;
-  /* Stack header → desc → footer */
   gap: 12px;
 }
 
-/* Club card top: avatar + name/dept side by side */
 .club-card-header {
   display: flex;
   flex-direction: row;
-  /* Avatar on left, text on right */
   align-items: center;
   gap: 12px;
 }
 
-/* Circular avatar with club initials */
 .club-avatar {
   width: 46px;
   height: 46px;
@@ -475,7 +375,6 @@ a {
   font-weight: 700;
   flex-shrink: 0;
 
-  /* Center the initials inside the avatar using flex */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -498,7 +397,6 @@ a {
   flex: 1;
 }
 
-/* Club card footer: category badge + event count on same row */
 .club-card-footer {
   display: flex;
   flex-direction: row;
@@ -521,9 +419,6 @@ a {
 }
 
 
-/* ──────────────────────────────────────
-   9. EMPTY STATE
-────────────────────────────────────── */
 .empty-state {
   width: 100%;
   text-align: center;
@@ -532,15 +427,20 @@ a {
 }
 
 
-/* ──────────────────────────────────────
-   10. ABOUT BOX
-────────────────────────────────────── */
+.about-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 28px;
+  align-items: stretch;
+}
+
 .about-box {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 28px;
-  max-width: 680px;
+  flex: 0 0 44%;
+  min-width: 0;
 
   display: flex;
   flex-direction: column;
@@ -584,7 +484,6 @@ a {
   margin-bottom: 10px;
 }
 
-/* Tech badge row — flex row with wrap */
 .tech-badges {
   display: flex;
   flex-direction: row;
@@ -603,9 +502,6 @@ a {
 }
 
 
-/* ──────────────────────────────────────
-   11. FOOTER
-────────────────────────────────────── */
 footer {
   background: var(--surface);
   border-top: 1px solid var(--border);
@@ -620,18 +516,10 @@ footer {
 }
 
 
-/* ──────────────────────────────────────
-   12. LOGIN PAGE
-   Flex center trick:
-   display:flex + justify-content:center + align-items:center
-   centers the form card both horizontally and vertically.
-────────────────────────────────────── */
 .center-wrap {
   display: flex;
   justify-content: center;
-  /* Center horizontally */
   align-items: center;
-  /* Center vertically   */
   min-height: 100vh;
   background: var(--bg);
   padding: 32px;
@@ -654,7 +542,6 @@ footer {
 .form-card-top {
   display: flex;
   flex-direction: column;
-  /* Icon → title → subtitle stacked */
   align-items: center;
   text-align: center;
   margin-bottom: 28px;
@@ -687,13 +574,9 @@ footer {
 }
 
 
-/* ──────────────────────────────────────
-   13. FORM ELEMENTS
-────────────────────────────────────── */
 .form-group {
   display: flex;
   flex-direction: column;
-  /* Label on top, input below */
   gap: 6px;
   margin-bottom: 16px;
 }
@@ -730,7 +613,6 @@ footer {
   min-height: 72px;
 }
 
-/* 2-column form row using flex */
 .form-row-2 {
   display: flex;
   flex-direction: row;
@@ -739,32 +621,24 @@ footer {
 
 .form-row-2 .form-group {
   flex: 1;
-  /* Each field takes equal width */
   margin-bottom: 16px;
 }
 
-/* 4-column form row using flex */
 .form-row-4 {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  /* Wrap on small screens */
   gap: 12px;
 }
 
 .form-row-4 .form-group {
   flex: 1 1 140px;
-  /* Grow/shrink, minimum 140px */
   margin-bottom: 16px;
 }
 
 
-/* ──────────────────────────────────────
-   14. BUTTONS
-────────────────────────────────────── */
 .btn {
   display: inline-flex;
-  /* Flex to align icon + text */
   align-items: center;
   justify-content: center;
   gap: 6px;
@@ -819,16 +693,12 @@ footer {
 }
 
 
-/* ──────────────────────────────────────
-   15. DASHBOARD
-────────────────────────────────────── */
 .dash-wrap {
   max-width: 1100px;
   margin: 0 auto;
   padding: 36px;
 }
 
-/* Dashboard header: title+sub on left, logout on right */
 .dash-header {
   display: flex;
   flex-direction: row;
@@ -850,7 +720,6 @@ footer {
   color: var(--text-muted);
 }
 
-/* KPI row — 4 cards in a flex row */
 .kpi-row {
   display: flex;
   flex-direction: row;
@@ -860,7 +729,6 @@ footer {
 
 .kpi-card {
   flex: 1;
-  /* Each card grows equally */
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -869,7 +737,6 @@ footer {
 
   display: flex;
   flex-direction: column;
-  /* Number on top, label below */
   align-items: center;
   gap: 4px;
   text-align: center;
@@ -888,7 +755,6 @@ footer {
   letter-spacing: 0.04em;
 }
 
-/* Tab bar */
 .tab-bar {
   display: flex;
   flex-direction: row;
@@ -919,7 +785,6 @@ footer {
   border-bottom-color: var(--primary);
 }
 
-/* Panel form card */
 .panel-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -941,13 +806,11 @@ footer {
   margin-bottom: 12px;
 }
 
-/* Individual club row in dashboard list */
 .club-row {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  /* Info left, delete button right */
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -966,7 +829,6 @@ footer {
   margin-top: 3px;
 }
 
-/* Events table */
 .table-wrap {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1008,11 +870,6 @@ footer {
 }
 
 
-/* ──────────────────────────────────────
-   16. MODAL
-────────────────────────────────────── */
-
-/* Dark overlay — flex to center the modal box */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -1022,17 +879,14 @@ footer {
   overflow-y: auto;
   padding: 32px;
 
-  /* Flex centering trick */
   justify-content: center;
   align-items: flex-start;
 }
 
 .modal-overlay.open {
   display: flex;
-  /* Enable flex only when open */
 }
 
-/* White modal box */
 .modal-box {
   background: var(--surface);
   border-radius: 14px;
@@ -1040,14 +894,12 @@ footer {
   width: 100%;
   max-width: 480px;
   margin: auto;
-  /* Center within flex overlay */
 
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Modal top bar: dept label + close button */
 .modal-top {
   display: flex;
   flex-direction: row;
@@ -1089,7 +941,6 @@ footer {
   line-height: 1.6;
 }
 
-/* Modal meta rows: date, time, venue, rsvp */
 .modal-meta {
   display: flex;
   flex-direction: column;
@@ -1115,9 +966,6 @@ footer {
 }
 
 
-/* ──────────────────────────────────────
-   17. TOAST NOTIFICATION
-────────────────────────────────────── */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -1131,12 +979,10 @@ footer {
   z-index: 9999;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 
-  /* Hidden state: below screen */
   transform: translateY(80px);
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
 
-  /* Flex to align icon + text */
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1148,22 +994,16 @@ footer {
 }
 
 
-/* ──────────────────────────────────────
-   18. RESPONSIVE — Mobile
-   Override flex directions and sizes for small screens
-────────────────────────────────────── */
 @media (max-width: 768px) {
 
   #navbar {
     padding: 0 16px;
   }
 
-  /* Hide nav links on mobile */
   .nav-links {
     display: none;
   }
 
-  /* Hero flex column already — just reduce padding */
   .hero {
     padding: 40px 16px 32px;
   }
@@ -1184,38 +1024,91 @@ footer {
     padding: 32px 16px;
   }
 
-  /* Cards: single column on mobile */
   .event-card,
   .club-card {
     flex: 1 1 100%;
-    /* Take full row width */
     max-width: 100%;
   }
 
-  /* KPI: 2 columns on mobile using flex-wrap */
   .kpi-row {
     flex-wrap: wrap;
   }
 
   .kpi-card {
     flex: 1 1 calc(50% - 8px);
-    /* 2 cards per row */
   }
 
-  /* Stack 2-col and 4-col form rows on mobile */
   .form-row-2,
   .form-row-4 {
     flex-direction: column;
   }
 
-  /* Full-width dashboard padding */
   .dash-wrap {
     padding: 20px 16px;
   }
 
-  /* Stack dash header on mobile */
   .dash-header {
     flex-direction: column;
     gap: 12px;
   }
+
+  .about-layout {
+    flex-direction: column;
+  }
+
+  #college-map {
+    min-height: 220px;
+  }
+}
+
+/* ── Map Section ─────────────────────────────────── */
+.map-section {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-section h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.map-address {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+#college-map {
+  width: 100%;
+  flex: 1;
+  min-height: 280px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: block;
+  box-shadow: var(--shadow);
+}
+
+.map-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.map-link:hover {
+  opacity: 0.75;
+  text-decoration: underline;
 }
