@@ -1,1114 +1,1476 @@
+/* ============================================================
+   CampusConnect — style.css
+   College Event Management — Web Technologies Mini Project
+
+   LAYOUT APPROACH: CSS Flexbox is used throughout this stylesheet.
+   Key Flexbox properties used:
+     display: flex        — enables flexbox on a container
+     flex-direction       — row (horizontal) or column (vertical)
+     flex-wrap: wrap      — allows items to wrap to the next line
+     justify-content      — alignment along the MAIN axis
+     align-items          — alignment along the CROSS axis
+     flex: 1              — shorthand for flex-grow, flex-shrink, flex-basis
+     gap                  — spacing between flex items
+============================================================ */
+
+
+/* ──────────────────────────────────────
+   1. CSS VARIABLES (Design Tokens)
+   All colors and sizes defined in one place.
+   Change a variable here → changes everywhere.
+────────────────────────────────────── */
 :root {
-  --primary: #1d4ed8;
-  --primary-dark: #1e40af;
-  --primary-light: #eff6ff;
-  --success: #16a34a;
-  --warning: #b45309;
-  --text: #1e293b;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --bg: #f1f5f9;
-  --surface: #ffffff;
-  --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --radius: 8px;
+    --primary: #1d4ed8;
+    /* Blue — main brand color       */
+    --primary-dark: #1e40af;
+    /* Darker blue — hover state     */
+    --primary-light: #eff6ff;
+    /* Light blue — badge background */
+    --success: #16a34a;
+    /* Green  — ongoing events       */
+    --warning: #b45309;
+    /* Amber  — upcoming events      */
+    --text: #1e293b;
+    /* Dark   — main text            */
+    --text-muted: #64748b;
+    /* Gray   — secondary text       */
+    --border: #e2e8f0;
+    /* Light gray — borders          */
+    --bg: #f1f5f9;
+    /* Page background               */
+    --surface: #ffffff;
+    /* Card / panel backgrounds      */
+    --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --radius: 8px;
 }
 
 
+/* ──────────────────────────────────────
+   2. RESET & BASE
+────────────────────────────────────── */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.6;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
 }
 
 a {
-  text-decoration: none;
-  color: inherit;
+    text-decoration: none;
+    color: inherit;
 }
 
 
+/* ──────────────────────────────────────
+   3. NAVIGATION BAR
+   Flex container: items arranged in a ROW.
+   space-between pushes logo left, links center, actions right.
+────────────────────────────────────── */
 #navbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: var(--surface);
-  border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
 
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    /* Enable flexbox */
+    flex-direction: row;
+    /* Arrange children left → right */
+    align-items: center;
+    /* Vertically center all items */
+    justify-content: space-between;
+    /* Logo | Links | Buttons */
 
-  padding: 0 36px;
-  height: 62px;
+    padding: 0 36px;
+    height: 62px;
 }
 
 .nav-logo {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--primary);
-  flex-shrink: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
+
+    /* Flex item: don't shrink below its natural size */
+    flex-shrink: 0;
 }
 
+/* Center nav links */
 .nav-links {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 32px;
+    display: flex;
+    /* Flex row for the links */
+    flex-direction: row;
+    align-items: center;
+    gap: 32px;
+    /* Space between each link */
 }
 
 .nav-links a {
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 14px;
-  transition: color 0.2s;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.2s;
 }
 
 .nav-links a:hover {
-  color: var(--primary);
+    color: var(--primary);
 }
 
+/* Right side buttons */
 .nav-actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+
+    flex-shrink: 0;
+    /* Don't shrink when window is narrow */
 }
 
 
+/* ──────────────────────────────────────
+   4. PAGE SYSTEM
+   Only .page.active is visible.
+────────────────────────────────────── */
 .page {
-  display: none;
+    display: none;
 }
 
 .page.active {
-  display: block;
-  min-height: 100vh;
+    display: block;
+    min-height: 100vh;
 }
 
 
+/* ──────────────────────────────────────
+   5. HERO SECTION
+   Flex column: title, subtitle, stats stacked vertically + centered.
+────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-  color: white;
-  padding: 68px 36px 52px;
+    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    color: white;
+    padding: 68px 36px 52px;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    /* Stack children top → bottom */
+    align-items: center;
+    /* Center horizontally */
+    text-align: center;
+    gap: 12px;
 }
 
 .hero h1 {
-  font-size: 34px;
-  font-weight: 700;
+    font-size: 34px;
+    font-weight: 700;
 }
 
 .hero>p {
-  font-size: 16px;
-  opacity: 0.9;
-  max-width: 520px;
+    font-size: 16px;
+    opacity: 0.9;
+    max-width: 520px;
 }
 
+/* Stats bar — flex row inside the hero */
 .hero-stats {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-top: 20px;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 14px;
-  padding: 16px 8px;
+    display: flex;
+    flex-direction: row;
+    /* Stats side by side */
+    align-items: center;
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    padding: 16px 8px;
 }
 
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 28px;
-  gap: 2px;
+    display: flex;
+    flex-direction: column;
+    /* Number on top, label below */
+    align-items: center;
+    padding: 0 28px;
+    gap: 2px;
 }
 
 .stat-num {
-  font-size: 28px;
-  font-weight: 700;
+    font-size: 28px;
+    font-weight: 700;
 }
 
 .stat-label {
-  font-size: 11px;
-  opacity: 0.8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    font-size: 11px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
+/* Vertical divider between stat items */
 .stat-divider {
-  width: 1px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.35);
-  flex-shrink: 0;
+    width: 1px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
 }
 
 
+/* ──────────────────────────────────────
+   6. CONTENT SECTIONS
+────────────────────────────────────── */
 .section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 52px 36px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 52px 36px;
 }
 
 .section-header {
-  margin-bottom: 24px;
+    margin-bottom: 24px;
 }
 
 .section-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 4px;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
 }
 
 .section-header p {
-  font-size: 14px;
-  color: var(--text-muted);
+    font-size: 14px;
+    color: var(--text-muted);
 }
 
 
+/* ──────────────────────────────────────
+   7. FILTER BAR
+   Flex row: dropdown | dropdown | search — all in one line.
+   flex-wrap allows them to stack on small screens.
+────────────────────────────────────── */
 .filter-bar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 28px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    /* Wrap to next line if screen is narrow */
+    gap: 12px;
+    margin-bottom: 28px;
 }
 
 .filter-bar select,
 .filter-bar input[type="text"] {
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: inherit;
-  font-size: 13px;
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.2s;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 13px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
 }
 
 .filter-bar select:focus,
 .filter-bar input[type="text"]:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
 }
 
+/* Search input grows to fill remaining space */
 .filter-bar input[type="text"] {
-  flex: 1;
-  min-width: 160px;
+    flex: 1;
+    /* flex-grow:1 — take all leftover width */
+    min-width: 160px;
 }
 
 
+/* ──────────────────────────────────────
+   8. CARDS GRID (Events & Clubs)
+   Flex row with wrap — each card has a fixed width,
+   and they wrap naturally when the row is full.
+────────────────────────────────────── */
 .cards-grid {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    /* Cards wrap to next row when needed */
+    gap: 20px;
 }
 
+/* Each card takes roughly 1/3 width; minimum 280px */
 .event-card,
 .club-card {
-  flex: 1 1 280px;
-  max-width: calc(33.33% - 14px);
+    flex: 1 1 280px;
+    /* grow: 1, shrink: 1, base width: 280px */
+    max-width: calc(33.33% - 14px);
+    /* Max 3 per row on wide screens */
 }
 
 
+/* ── EVENT CARD ── */
 .event-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
 
-  display: flex;
-  flex-direction: column;
+    /* Flex column: stripe → body → footer stacked vertically */
+    display: flex;
+    flex-direction: column;
 }
 
 .event-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
 }
 
+/* Colored top stripe indicating event status */
 .card-stripe {
-  height: 5px;
-  background: var(--primary);
-  flex-shrink: 0;
+    height: 5px;
+    background: var(--primary);
+    flex-shrink: 0;
 }
 
 .card-stripe.ongoing {
-  background: #16a34a;
+    background: #16a34a;
 }
 
 .card-stripe.upcoming {
-  background: #f59e0b;
+    background: #f59e0b;
 }
 
 .card-stripe.past {
-  background: #94a3b8;
+    background: #94a3b8;
 }
 
+/* Card body: flex column with padding */
 .card-body {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    /* Grow to push footer to the bottom */
 }
 
 .card-dept {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--primary);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
 }
 
 .card-club {
-  font-size: 11px;
-  color: var(--text-muted);
+    font-size: 11px;
+    color: var(--text-muted);
 }
 
 .card-title {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.4;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .card-desc {
-  font-size: 13px;
-  color: var(--text-muted);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-top: auto;
+    font-size: 13px;
+    color: var(--text-muted);
+    /* Limit description to 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: auto;
 }
 
+/* Meta row: date | time | venue as flex items */
 .card-meta {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--text-muted);
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-  margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
 }
 
+/* Card footer: badge on left, RSVP count on right */
 .card-footer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    /* Push items to edges */
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 
+/* ── STATUS BADGES (pill-shaped labels) ── */
 .badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: capitalize;
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
 }
 
 .badge-ongoing {
-  background: #dcfce7;
-  color: #15803d;
+    background: #dcfce7;
+    color: #15803d;
 }
 
 .badge-upcoming {
-  background: #fef3c7;
-  color: #b45309;
+    background: #fef3c7;
+    color: #b45309;
 }
 
 .badge-past {
-  background: #f1f5f9;
-  color: #64748b;
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+/* Registration type badges */
+.badge-solo {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.badge-team {
+    background: #faf5ff;
+    color: #7c3aed;
 }
 
 
+/* ── CLUB CARD ── */
 .club-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  box-shadow: var(--shadow);
-  padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 20px;
 
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    /* Stack header → desc → footer */
+    gap: 12px;
 }
 
+/* Club card top: avatar + name/dept side by side */
 .club-card-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
+    display: flex;
+    flex-direction: row;
+    /* Avatar on left, text on right */
+    align-items: center;
+    gap: 12px;
 }
 
+/* Circular avatar with club initials */
 .club-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
-  background: var(--primary);
-  color: white;
-  font-size: 15px;
-  font-weight: 700;
-  flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    /* Center the initials inside the avatar using flex */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .club-name {
-  font-size: 15px;
-  font-weight: 600;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .club-dept-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 2px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
 }
 
 .club-desc {
-  font-size: 13px;
-  color: var(--text-muted);
-  flex: 1;
+    font-size: 13px;
+    color: var(--text-muted);
+    flex: 1;
 }
 
+/* Club card footer: category badge + event count on same row */
 .club-card-footer {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .cat-badge {
-  font-size: 11px;
-  background: var(--primary-light);
-  color: var(--primary);
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-weight: 500;
+    font-size: 11px;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 500;
 }
 
 .event-count-label {
-  font-size: 12px;
-  color: var(--text-muted);
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 
+/* ──────────────────────────────────────
+   9. EMPTY STATE
+────────────────────────────────────── */
 .empty-state {
-  width: 100%;
-  text-align: center;
-  padding: 48px;
-  color: var(--text-muted);
+    width: 100%;
+    text-align: center;
+    padding: 48px;
+    color: var(--text-muted);
 }
 
 
+/* ──────────────────────────────────────
+   10. ABOUT SECTION — Two-column layout
+   Map on LEFT, text on RIGHT.
+────────────────────────────────────── */
 .about-layout {
-  display: flex;
-  flex-direction: row;
-  gap: 28px;
-  align-items: stretch;
+    display: flex;
+    flex-direction: row;
+    gap: 28px;
+    align-items: stretch;
+}
+
+.about-map-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.campus-map {
+    width: 100%;
+    height: 100%;
+    min-height: 380px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    z-index: 1;
+}
+
+.map-caption {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    font-weight: 500;
 }
 
 .about-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 28px;
-  flex: 0 0 44%;
-  min-width: 0;
+    flex: 1;
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px;
 
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .about-box h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--primary);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary);
 }
 
 .about-box>p {
-  font-size: 14px;
-  color: var(--text-muted);
-  line-height: 1.7;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
 }
 
 .about-features {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .feature-item {
-  font-size: 14px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
 }
 
 .feature-item:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .tech-stack h4 {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
 }
 
+/* Tech badge row — flex row with wrap */
 .tech-badges {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .tech-badge {
-  background: var(--primary-light);
-  color: var(--primary);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 14px;
-  border-radius: 999px;
-  border: 1px solid #bfdbfe;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 999px;
+    border: 1px solid #bfdbfe;
 }
 
 
+/* ──────────────────────────────────────
+   11. FOOTER
+────────────────────────────────────── */
 footer {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 22px 36px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 22px 36px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 
+/* ──────────────────────────────────────
+   12. LOGIN PAGE
+   Flex center trick:
+   display:flex + justify-content:center + align-items:center
+   centers the form card both horizontally and vertically.
+────────────────────────────────────── */
 .center-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: var(--bg);
-  padding: 32px;
+    display: flex;
+    justify-content: center;
+    /* Center horizontally */
+    align-items: center;
+    /* Center vertically   */
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 32px;
 }
 
 .form-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 36px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 
 .form-card-top {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 28px;
-  gap: 6px;
+    display: flex;
+    flex-direction: column;
+    /* Icon → title → subtitle stacked */
+    align-items: center;
+    text-align: center;
+    margin-bottom: 28px;
+    gap: 6px;
 }
 
 .form-icon {
-  font-size: 42px;
+    font-size: 42px;
 }
 
 .form-card-top h2 {
-  font-size: 22px;
-  font-weight: 700;
+    font-size: 22px;
+    font-weight: 700;
 }
 
 .form-card-top p {
-  font-size: 13px;
-  color: var(--text-muted);
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
 .login-hint {
-  margin-top: 20px;
-  padding: 12px 14px;
-  background: #fef9c3;
-  border-radius: var(--radius);
-  font-size: 12px;
-  color: #92400e;
-  line-height: 1.7;
-  border: 1px solid #fde68a;
+    margin-top: 20px;
+    padding: 12px 14px;
+    background: #fef9c3;
+    border-radius: var(--radius);
+    font-size: 12px;
+    color: #92400e;
+    line-height: 1.7;
+    border: 1px solid #fde68a;
 }
 
 
+/* ──────────────────────────────────────
+   12B. FORGOT PASSWORD
+────────────────────────────────────── */
+.forgot-password-link {
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.forgot-password-link a {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.forgot-password-link a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.forgot-password-section {
+    margin-top: 16px;
+    padding: 20px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.forgot-password-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.forgot-password-section > p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.forgot-result {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.forgot-result-success {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.forgot-result-error {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.password-reveal {
+    display: inline-block;
+    background: #15803d;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+}
+
+
+/* ──────────────────────────────────────
+   13. FORM ELEMENTS
+────────────────────────────────────── */
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    /* Label on top, input below */
+    gap: 6px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
-  font-size: 13px;
-  font-weight: 500;
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  outline: none;
-  transition: border-color 0.2s;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
 }
 
 .form-group textarea {
-  resize: vertical;
-  min-height: 72px;
+    resize: vertical;
+    min-height: 72px;
 }
 
+/* 2-column form row using flex */
 .form-row-2 {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
 }
 
 .form-row-2 .form-group {
-  flex: 1;
-  margin-bottom: 16px;
+    flex: 1;
+    /* Each field takes equal width */
+    margin-bottom: 16px;
 }
 
+/* 4-column form row using flex */
 .form-row-4 {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 12px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    /* Wrap on small screens */
+    gap: 12px;
 }
 
 .form-row-4 .form-group {
-  flex: 1 1 140px;
-  margin-bottom: 16px;
+    flex: 1 1 140px;
+    /* Grow/shrink, minimum 140px */
+    margin-bottom: 16px;
 }
 
 
+/* ──────────────────────────────────────
+   14. BUTTONS
+────────────────────────────────────── */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 20px;
-  border-radius: var(--radius);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: background 0.15s;
-  white-space: nowrap;
+    display: inline-flex;
+    /* Flex to align icon + text */
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s;
+    white-space: nowrap;
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: white;
+    background: var(--primary);
+    color: white;
 }
 
 .btn-primary:hover {
-  background: var(--primary-dark);
+    background: var(--primary-dark);
 }
 
 .btn-outline {
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
 }
 
 .btn-outline:hover {
-  background: var(--bg);
+    background: var(--bg);
 }
 
 .btn-danger {
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  border-radius: var(--radius);
-  transition: background 0.15s;
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius);
+    transition: background 0.15s;
 }
 
 .btn-danger:hover {
-  background: #fecaca;
+    background: #fecaca;
+}
+
+/* Edit button for dashboard */
+.btn-edit {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: var(--radius);
+    transition: background 0.15s;
+    font-weight: 500;
+}
+
+.btn-edit:hover {
+    background: #dbeafe;
+}
+
+/* Action buttons group (Edit + Delete side by side) */
+.action-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
 }
 
 .btn-full {
-  width: 100%;
+    width: 100%;
 }
 
 
+/* ──────────────────────────────────────
+   15. DASHBOARD
+────────────────────────────────────── */
 .dash-wrap {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 36px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px;
 }
 
+/* Dashboard header: title+sub on left, logout on right */
 .dash-header {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding-bottom: 20px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
 }
 
 .dash-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 4px;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
 }
 
 .dash-header p {
-  font-size: 13px;
-  color: var(--text-muted);
+    font-size: 13px;
+    color: var(--text-muted);
 }
 
+/* KPI row — 4 cards in a flex row */
 .kpi-row {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  margin-bottom: 28px;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    margin-bottom: 28px;
 }
 
 .kpi-card {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: var(--shadow);
+    flex: 1;
+    /* Each card grows equally */
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: var(--shadow);
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
+    display: flex;
+    flex-direction: column;
+    /* Number on top, label below */
+    align-items: center;
+    gap: 4px;
+    text-align: center;
 }
 
 .kpi-num {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--primary);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
 }
 
 .kpi-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
+/* Tab bar */
 .tab-bar {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  border-bottom: 2px solid var(--border);
-  margin-bottom: 24px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 24px;
 }
 
 .tab {
-  padding: 10px 22px;
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: color 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+    padding: 10px 22px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+    color: var(--primary);
+    border-bottom-color: var(--primary);
 }
 
+/* Panel form card */
 .panel-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: var(--shadow);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
 }
 
 .panel-card h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 18px;
 }
 
 .panel-title {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
 }
 
+/* Individual club row in dashboard list */
 .club-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 18px;
-  margin-bottom: 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    /* Info left, delete button right */
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 8px;
 }
 
 .club-row-name {
-  font-weight: 600;
-  font-size: 14px;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .club-row-meta {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 3px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
 }
 
+/* Events table */
 .table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: auto;
-  box-shadow: var(--shadow);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: auto;
+    box-shadow: var(--shadow);
 }
 
 .data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
 }
 
 .data-table th {
-  padding: 12px 16px;
-  text-align: left;
-  background: var(--bg);
-  font-weight: 600;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    text-align: left;
+    background: var(--bg);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
 }
 
 .data-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
 }
 
 .data-table tr:last-child td {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .data-table tr:hover {
-  background: #f8fafc;
+    background: #f8fafc;
 }
 
 
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 2000;
-  overflow-y: auto;
-  padding: 32px;
+/* ──────────────────────────────────────
+   16. MODAL
+────────────────────────────────────── */
 
-  justify-content: center;
-  align-items: flex-start;
+/* Dark overlay — flex to center the modal box */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    overflow-y: auto;
+    padding: 32px;
+
+    /* Flex centering trick */
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .modal-overlay.open {
-  display: flex;
+    display: flex;
+    /* Enable flex only when open */
 }
 
+/* White modal box */
 .modal-box {
-  background: var(--surface);
-  border-radius: 14px;
-  padding: 28px;
-  width: 100%;
-  max-width: 480px;
-  margin: auto;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 480px;
+    margin: auto;
+    /* Center within flex overlay */
 
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
+/* Modal top bar: dept label + close button */
 .modal-top {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .modal-dept {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--primary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .modal-close {
-  background: none;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  color: var(--text-muted);
-  padding: 4px 8px;
-  border-radius: 4px;
-  line-height: 1;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px 8px;
+    border-radius: 4px;
+    line-height: 1;
 }
 
 .modal-close:hover {
-  background: var(--bg);
+    background: var(--bg);
 }
 
 .modal-box h3 {
-  font-size: 20px;
-  font-weight: 700;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 .modal-desc {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.6;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
 }
 
+/* Modal meta rows: date, time, venue, rsvp */
 .modal-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .meta-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
 }
 
 .modal-box hr {
-  border: none;
-  border-top: 1px solid var(--border);
+    border: none;
+    border-top: 1px solid var(--border);
 }
 
 .modal-box h4 {
-  font-size: 15px;
-  font-weight: 600;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 
+/* ──────────────────────────────────────
+   16B. RSVP SOLO/TEAM SELECTION
+────────────────────────────────────── */
+.reg-type-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.reg-type-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 20px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.reg-type-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.reg-type-icon {
+    font-size: 28px;
+}
+
+.reg-type-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.reg-type-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.rsvp-back-link {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--primary);
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.rsvp-back-link:hover {
+    text-decoration: underline;
+}
+
+/* Team member card for dynamic member fields */
+.team-member-card {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.team-member-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+}
+
+.team-member-card .form-row-2 {
+    margin-bottom: 0;
+}
+
+.team-member-card .form-group {
+    margin-bottom: 0;
+}
+
+
+/* ──────────────────────────────────────
+   17. TOAST NOTIFICATION
+────────────────────────────────────── */
 .toast {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: #1e293b;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  z-index: 9999;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1e293b;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 9999;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 
-  transform: translateY(80px);
-  opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+    /* Hidden state: below screen */
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
 
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    /* Flex to align icon + text */
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .toast.show {
-  transform: translateY(0);
-  opacity: 1;
+    transform: translateY(0);
+    opacity: 1;
 }
 
 
+/* ──────────────────────────────────────
+   18. RESPONSIVE — Mobile
+   Override flex directions and sizes for small screens
+────────────────────────────────────── */
 @media (max-width: 768px) {
 
-  #navbar {
-    padding: 0 16px;
-  }
+    #navbar {
+        padding: 0 16px;
+    }
 
-  .nav-links {
-    display: none;
-  }
+    /* Hide nav links on mobile */
+    .nav-links {
+        display: none;
+    }
 
-  .hero {
-    padding: 40px 16px 32px;
-  }
+    /* Hero flex column already — just reduce padding */
+    .hero {
+        padding: 40px 16px 32px;
+    }
 
-  .hero h1 {
-    font-size: 24px;
-  }
+    .hero h1 {
+        font-size: 24px;
+    }
 
-  .hero-stats {
-    padding: 12px 0;
-  }
+    .hero-stats {
+        padding: 12px 0;
+    }
 
-  .stat-item {
-    padding: 0 16px;
-  }
+    .stat-item {
+        padding: 0 16px;
+    }
 
-  .section {
-    padding: 32px 16px;
-  }
+    .section {
+        padding: 32px 16px;
+    }
 
-  .event-card,
-  .club-card {
-    flex: 1 1 100%;
-    max-width: 100%;
-  }
+    /* Cards: single column on mobile */
+    .event-card,
+    .club-card {
+        flex: 1 1 100%;
+        /* Take full row width */
+        max-width: 100%;
+    }
 
-  .kpi-row {
-    flex-wrap: wrap;
-  }
+    /* KPI: 2 columns on mobile using flex-wrap */
+    .kpi-row {
+        flex-wrap: wrap;
+    }
 
-  .kpi-card {
-    flex: 1 1 calc(50% - 8px);
-  }
+    .kpi-card {
+        flex: 1 1 calc(50% - 8px);
+        /* 2 cards per row */
+    }
 
-  .form-row-2,
-  .form-row-4 {
-    flex-direction: column;
-  }
+    /* Stack 2-col and 4-col form rows on mobile */
+    .form-row-2,
+    .form-row-4 {
+        flex-direction: column;
+    }
 
-  .dash-wrap {
-    padding: 20px 16px;
-  }
+    /* Full-width dashboard padding */
+    .dash-wrap {
+        padding: 20px 16px;
+    }
 
-  .dash-header {
-    flex-direction: column;
-    gap: 12px;
-  }
+    /* Stack dash header on mobile */
+    .dash-header {
+        flex-direction: column;
+        gap: 12px;
+    }
 
-  .about-layout {
-    flex-direction: column;
-  }
+    /* Stack reg-type buttons on mobile */
+    .reg-type-buttons {
+        flex-direction: column;
+    }
 
-  #college-map {
-    min-height: 220px;
-  }
-}
+    /* Stack action buttons on mobile */
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
 
-/* ── Map Section ─────────────────────────────────── */
-.map-section {
-  flex: 1 1 0;
-  min-width: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+    /* Stack about layout on mobile (map on top) */
+    .about-layout {
+        flex-direction: column;
+    }
 
-.map-section h4 {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+    .campus-map {
+        min-height: 280px;
+    }
 
-.map-address {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-#college-map {
-  width: 100%;
-  flex: 1;
-  min-height: 280px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  display: block;
-  box-shadow: var(--shadow);
-}
-
-.map-link {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--primary);
-  font-weight: 500;
-  text-decoration: none;
-  transition: opacity 0.15s;
-}
-
-.map-link:hover {
-  opacity: 0.75;
-  text-decoration: underline;
+    /* Stack team member form fields on mobile */
+    .team-member-card .form-row-2 {
+        flex-direction: column;
+    }
 }

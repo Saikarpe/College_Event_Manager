@@ -13,11 +13,6 @@ CREATE DATABASE IF NOT EXISTS college_events;
 
 -- Select this database for all following commands
 USE college_events;
--- Create the database if it doesn't already exist
-CREATE DATABASE IF NOT EXISTS college_events;
-
--- Select this database for all following commands
-USE college_events;
 
 -- ────────────────────────────────────────
 -- TABLE 1: departments
@@ -82,8 +77,8 @@ CREATE TABLE IF NOT EXISTS rsvp (
     event_id        INT          NOT NULL,
     student_name    VARCHAR(100) NOT NULL,
     student_email   VARCHAR(100) NOT NULL,
-    team_name       VARCHAR(100) NULL DEFAULT NULL,
-    team_size       INT          NOT NULL DEFAULT 1,
+    reg_type        ENUM('solo','team') NOT NULL DEFAULT 'solo',
+    team_name       VARCHAR(100) DEFAULT NULL,
     registered_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (event_id) REFERENCES events(id)
 );
@@ -116,53 +111,22 @@ INSERT INTO coordinators (dept_id, coord_id, password) VALUES
 
 -- Insert sample clubs (id is auto-assigned: 1–8)
 INSERT INTO clubs (dept_id, name, category, description) VALUES
-
--- IT Department
-('it', 'ITERA', 'Technical', 'Focuses on programming skills, coding practices, and software development.'),
-('it', 'AI/ML Club', 'Technical', 'Works on artificial intelligence, machine learning models, and data-driven solutions.'),
-('it', 'AWS Club', 'Technical', 'Promotes cloud computing knowledge, AWS services, and deployment practices.'),
-('it', 'Cyber Security Club', 'Technical', 'Focuses on ethical hacking, network security, and cyber threat analysis.'),
-('it', 'CSI', 'Technical', 'Engages students in computer science advancements, technical knowledge sharing, and innovation.'),
-('it', 'GeeksforGeeks Club', 'Technical', 'Enhances problem-solving skills and strengthens data structures and algorithms knowledge.'),
-
--- Mechanical Department
-('me', 'MESA', 'Technical', 'Develops mechanical engineering knowledge through design, manufacturing, and analysis activities.'),
-('me', 'SAE India', 'Technical', 'Focuses on automotive engineering, vehicle design, and mobility solutions.'),
-('me', 'ISHARE', 'Technical', 'Promotes research and development in mechanical systems and innovative engineering ideas.'),
-('me', 'MBAJA Club', 'Technical', 'Works on designing and building all-terrain vehicles and practical automotive applications.'),
-('me', '3D Printing Club', 'Technical', 'Explores additive manufacturing, prototyping, and product design using 3D printing.'),
-
--- Structural / Civil (STR)
-('st', 'ASES', 'Technical', 'Focuses on structural engineering concepts, design analysis, and construction techniques.'),
-
--- Mechatronics / Robotics (MTX)
-('mx', 'EMCC', 'Technical', 'Encourages robotics development, embedded systems, and automation projects.'),
-('mx', 'TechTitans Robotics', 'Technical', 'Focuses on robotics design, programming, and intelligent system development.'),
-('mx', 'Nexas Aerotech', 'Technical', 'Specializes in drone technology, aerodynamics, and UAV development.');
+    ('cs',  'Coding Club',        'Technical', 'Competitive programming and software development workshops.'),
+    ('cs',  'AI/ML Society',      'Technical', 'Artificial intelligence and machine learning research projects.'),
+    ('cs',  'Cultural Society',   'Cultural',  'Arts, music, drama and cultural events for all students.'),
+    ('it',  'CSI Chapter',        'Technical', 'Computer Society of India student chapter activities.'),
+    ('ece', 'IEEE ECE',           'Technical', 'IEEE student branch for electronics and communication enthusiasts.'),
+    ('me',  'Robocon Team',       'Technical', 'National Robocon robotics competition team.'),
+    ('ee',  'Power Systems Club', 'Technical', 'Electrical power systems and smart grid research group.'),
+    ('cv',  'GreenBuild Club',    'Social',    'Sustainable construction and eco-friendly design initiatives.');
 
 -- Insert sample events
 INSERT INTO events (dept_id, club_id, title, description, event_date, event_time, venue, status, rsvp_count) VALUES
-
--- IT Department Events
-('it', 1, 'CodeWar', 'Competitive coding competition focusing on problem-solving and algorithmic skills.', '2026-04-20', '9:00 AM', 'IT Lab 1', 'upcoming', 120),
-('it', 2, 'AI/ML Workshop', 'Hands-on session on machine learning models and AI tools.', '2026-04-14', '11:00 AM', 'Seminar Hall IT', 'ongoing', 85),
-('it', 3, 'AWS Student Community Day', 'Cloud computing session covering AWS services and real-world deployment.', '2026-04-10', '10:00 AM', 'Auditorium', 'completed', 150),
-('it', 4, 'Cyber Security Awareness', 'Workshop on ethical hacking, cyber threats, and data protection.', '2026-04-22', '2:00 PM', 'IT Lab 2', 'upcoming', 90),
-('it', 5, 'Coder Kesary 2K26', 'Coding competition to test programming logic and speed.', '2026-04-12', '9:30 AM', 'Computer Center', 'completed', 110),
-('it', 6, 'ByteBattle Coding Challenge', 'Competitive programming contest with real-world coding challenges.', '2026-04-14', '10:00 AM', 'IT Lab 3', 'ongoing', 95),
-
--- Mechanical Department Events
-('me', 7, 'Jalawa Premier League', 'Fun and competitive team-based activities.', '2026-04-18', '4:00 PM', 'Mechanical Ground', 'upcoming', 140),
-('me', 8, 'Automotive Design Workshop', 'Session on vehicle design and engineering concepts.', '2026-04-13', '10:00 AM', 'Mech Lab', 'completed', 60),
-('me', 9, 'Innovation Meetup', 'Platform for students to present innovative ideas.', '2026-04-14', '1:00 PM', 'Seminar Hall Mech', 'ongoing', 50),
-('me', 10, 'BAJA Vehicle Session', 'Discussion on all-terrain vehicle design.', '2026-04-21', '11:00 AM', 'Workshop Area', 'upcoming', 70),
-('me', 11, '3D Printing Demo', 'Demonstration of additive manufacturing.', '2026-04-11', '2:00 PM', 'Design Lab', 'completed', 65),
-
--- Structural Department Events
-('st', 12, 'Art Mela', 'Sketching and painting competition.', '2026-04-14', '3:00 PM', 'Civil Hall', 'ongoing', 80),
-('st', 12, 'SPACE 2K25', 'National level technical competition on structural design.', '2026-04-25', '9:00 AM', 'Civil Department', 'upcoming', 130),
-
--- Mechatronics / Robotics Events
-('mx', 13, 'RoboRace', 'Robotics competition with racing bots.', '2026-04-13', '10:00 AM', 'Robotics Lab', 'completed', 75),
-('mx', 14, 'Line Follower Robot', 'Autonomous robot competition.', '2026-04-14', '12:00 PM', 'Electronics Lab', 'ongoing', 68),
-('mx', 15, 'Drone Tech Workshop', 'Workshop on drone building and aerodynamics.', '2026-04-23', '11:00 AM', 'Open Ground', 'upcoming', 90);
+    ('cs',  1, 'Code Sprint 2026',    '24-hour competitive programming marathon. Cash prizes worth 15,000.',        '2026-04-15', '8:00 AM',  'CS Building',        'upcoming', 98),
+    ('cs',  2, 'AI & ML Seminar',     'Expert talk on real-world applications of AI and ML in industry.',           '2026-04-18', '11:00 AM', 'Seminar Hall A',     'upcoming', 72),
+    ('it',  4, 'Web Dev Bootcamp',    '3-day hands-on bootcamp — HTML, CSS, JavaScript, and PHP.',                 '2026-04-10', '10:00 AM', 'Lab 3 & 4',          'upcoming', 56),
+    ('ece', 5, 'Arduino Workshop',    'Build IoT projects from scratch using Arduino microcontrollers.',             '2026-04-08', '2:00 PM',  'Electronics Lab',    'ongoing',  34),
+    ('me',  6, 'Robocon Qualifier',   'Internal qualifier for the national Robocon robotics competition.',          '2026-04-20', '9:00 AM',  'Mech Workshop',      'upcoming', 28),
+    ('cs',  3, 'Tarang Cultural Fest','Annual cultural extravaganza — dance, drama, music and art.',                '2026-04-25', '5:00 PM',  'Auditorium',         'upcoming', 210),
+    ('ee',  7, 'Smart Grid Talk',     'Industry expert session on smart grids and renewable energy integration.',   '2026-04-08', '3:00 PM',  'EE Seminar Room',    'ongoing',  41),
+    ('cv',  8, 'Green Build Expo',    'Showcase of sustainable construction materials and modern techniques.',      '2026-04-22', '10:00 AM', 'Civil Dept Hall',    'upcoming', 36);
