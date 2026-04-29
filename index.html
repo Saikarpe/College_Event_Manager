@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="scroll-behavior:smooth">
 
 <head>
     <!-- META CHARSET: tells the browser to use UTF-8 character encoding -->
@@ -222,7 +222,10 @@
                 <!-- Password input -->
                 <div class="form-group">
                     <label for="loginPass">Password</label>
-                    <input type="password" id="loginPass" placeholder="Enter your password">
+                    <div class="password-wrap">
+                        <input type="password" id="loginPass" placeholder="Enter your password">
+                        <button type="button" class="password-toggle" id="togglePassBtn" onclick="togglePassword()">👁</button>
+                    </div>
                 </div>
 
                 <!-- Sign-In button calls doLogin() in script.js -->
@@ -652,6 +655,19 @@
         </div>
     </div><!-- end editClubModal -->
 
+
+    <!-- CONFIRM MODAL: styled replacement for browser confirm() -->
+    <div id="confirmModal" class="modal-overlay" onclick="closeConfirmOnBg(event)">
+        <div class="modal-box confirm-box">
+            <div class="confirm-icon">⚠️</div>
+            <h3 id="confirmTitle">Are you sure?</h3>
+            <p id="confirmMessage" class="modal-desc"></p>
+            <div class="confirm-actions">
+                <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+                <button class="btn btn-danger-solid" id="confirmYesBtn">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
 
     <!-- TOAST NOTIFICATION: brief status messages shown at bottom-right -->
     <div id="toast" class="toast"></div>

@@ -37,6 +37,11 @@ function showPage(name) {
     });
     document.getElementById('page-' + name).classList.add('active');
     window.scrollTo(0, 0);
+
+    /* Auto-focus first input on login page */
+    if (name === 'login') {
+        setTimeout(function () { document.getElementById('loginDept').focus(); }, 100);
+    }
 }
 
 
@@ -424,25 +429,28 @@ async function submitRSVP() {
         /* Solo: collect single member from the solo fields */
         var name = document.getElementById('rsvpName').value.trim();
         var email = document.getElementById('rsvpEmail').value.trim();
-        if (!name) { alert('Please enter your name.'); return; }
-        if (!email) { alert('Please enter your email.'); return; }
+        if (!name) { showToast('⚠️ Please enter your name.'); return; }
+        if (!email) { showToast('⚠️ Please enter your email.'); return; }
         members.push({ name: name, email: email });
     } else {
         /* Team: collect all member fields */
-        if (!teamName) { alert('Please enter your team name.'); return; }
+        if (!teamName) { showToast('⚠️ Please enter your team name.'); return; }
         var teamSize = parseInt(document.getElementById('rsvpTeamSize').value) || 0;
-        if (teamSize < 2 || teamSize > 4) { alert('Please select a team size (2-4 members).'); return; }
+        if (teamSize < 2 || teamSize > 4) { showToast('⚠️ Please select a team size (2-4 members).'); return; }
 
         for (var i = 1; i <= teamSize; i++) {
             var mName = document.getElementById('memberName' + i).value.trim();
             var mEmail = document.getElementById('memberEmail' + i).value.trim();
             if (!mName || !mEmail) {
-                alert('Please fill in Name and Email for Member ' + i + '.');
+                showToast('⚠️ Please fill in Name and Email for Member ' + i + '.');
                 return;
             }
             members.push({ name: mName, email: mEmail });
         }
     }
+
+    var btn = document.querySelector('#rsvpStep2 .btn-primary');
+    setLoading(btn, true);
 
     try {
         /* Send as JSON so the backend can handle multiple members */
@@ -472,6 +480,8 @@ async function submitRSVP() {
     } catch (error) {
         showToast('⚠️ Server error. Please try again.');
         closeModal();
+    } finally {
+        setLoading(btn, false);
     }
 }
 
@@ -490,9 +500,12 @@ async function doLogin() {
     var coordId = document.getElementById('loginId').value.trim();
     var password = document.getElementById('loginPass').value;
 
-    if (!deptId) { alert('Please select your department.'); return; }
-    if (!coordId) { alert('Please enter your Coordinator ID.'); return; }
-    if (!password) { alert('Please enter your password.'); return; }
+    if (!deptId) { showToast('⚠️ Please select your department.'); return; }
+    if (!coordId) { showToast('⚠️ Please enter your Coordinator ID.'); return; }
+    if (!password) { showToast('⚠️ Please enter your password.'); return; }
+
+    var btn = document.querySelector('#page-login .btn-primary');
+    setLoading(btn, true);
 
     try {
         /* Send credentials to PHP as POST data */
@@ -510,10 +523,12 @@ async function doLogin() {
                 || { id: data.dept_id, name: data.dept_name, short_name: data.dept_id.toUpperCase() };
             onLoginSuccess();
         } else {
-            alert(data.message || 'Invalid credentials. Please try again.');
+            showToast('❌ ' + (data.message || 'Invalid credentials. Please try again.'));
         }
     } catch (error) {
-        alert('Cannot reach the server. Make sure XAMPP is running.');
+        showToast('⚠️ Cannot reach the server. Make sure XAMPP is running.');
+    } finally {
+        setLoading(btn, false);
     }
 }
 
@@ -558,8 +573,8 @@ async function forgotPassword() {
     var coordId = document.getElementById('forgotCoordId').value.trim();
     var deptName = document.getElementById('forgotDeptName').value.trim();
 
-    if (!coordId) { alert('Please enter your Coordinator ID.'); return; }
-    if (!deptName) { alert('Please type your Department Name for verification.'); return; }
+    if (!coordId) { showToast('⚠️ Please enter your Coordinator ID.'); return; }
+    if (!deptName) { showToast('⚠️ Please type your Department Name for verification.'); return; }
 
     try {
         var formData = new FormData();
@@ -583,7 +598,7 @@ async function forgotPassword() {
             resultDiv.innerHTML = '❌ ' + (data.message || 'Verification failed. Check your Coordinator ID and Department Name.');
         }
     } catch (error) {
-        alert('Cannot reach the server. Make sure XAMPP is running.');
+        showToast('⚠️ Cannot reach the server. Make sure XAMPP is running.');
     }
 }
 
@@ -700,7 +715,10 @@ async function addClub() {
     var cat = document.getElementById('newClubCat').value;
     var desc = document.getElementById('newClubDesc').value.trim();
 
-    if (!name) { alert('Please enter a club name.'); return; }
+    if (!name) { showToast('⚠️ Please enter a club name.'); return; }
+
+    var btn = document.querySelector('#panel-clubs .btn-primary');
+    setLoading(btn, true);
 
     try {
         var formData = new FormData();
@@ -724,40 +742,42 @@ async function addClub() {
             updateStats();
             showToast('✅ Club "' + name + '" created!');
         } else {
-            alert(data.message || 'Failed to create club.');
+            showToast('❌ ' + (data.message || 'Failed to create club.'));
         }
     } catch (error) {
-        alert('Server error. Make sure XAMPP is running.');
+        showToast('⚠️ Server error. Make sure XAMPP is running.');
+    } finally {
+        setLoading(btn, false);
     }
 }
 
 /**
  * deleteClub(id) — calls delete_club.php → DELETE from MySQL.
  */
-async function deleteClub(id) {
-    if (!confirm('Delete this club and all its events?')) return;
+function deleteClub(id) {
+    showConfirm('Delete this club and all its events?', async function () {
+        try {
+            var formData = new FormData();
+            formData.append('id', id);
 
-    try {
-        var formData = new FormData();
-        formData.append('id', id);
+            var response = await fetch('php/delete_club.php', { method: 'POST', body: formData });
+            var data = await response.json();
 
-        var response = await fetch('php/delete_club.php', { method: 'POST', body: formData });
-        var data = await response.json();
-
-        if (data.success) {
-            /* Reload both clubs and events from DB (events cascade-deleted) */
-            await Promise.all([loadClubs(), loadEvents()]);
-            renderDashboard();
-            renderClubs();
-            renderEvents();
-            updateStats();
-            showToast('Club deleted.');
-        } else {
-            alert(data.message || 'Delete failed.');
+            if (data.success) {
+                /* Reload both clubs and events from DB (events cascade-deleted) */
+                await Promise.all([loadClubs(), loadEvents()]);
+                renderDashboard();
+                renderClubs();
+                renderEvents();
+                updateStats();
+                showToast('🗑️ Club deleted.');
+            } else {
+                showToast('❌ ' + (data.message || 'Delete failed.'));
+            }
+        } catch (error) {
+            showToast('⚠️ Server error. Make sure XAMPP is running.');
         }
-    } catch (error) {
-        alert('Server error. Make sure XAMPP is running.');
-    }
+    });
 }
 
 
@@ -779,7 +799,7 @@ async function addEvent() {
     var desc = document.getElementById('newEvDesc').value.trim();
 
     if (!title || !clubId || !date || !venue) {
-        alert('Please fill in Title, Club, Date, and Venue.');
+        showToast('⚠️ Please fill in Title, Club, Date, and Venue.');
         return;
     }
 
@@ -790,6 +810,9 @@ async function addEvent() {
     var period = hr >= 12 ? 'PM' : 'AM';
     var hr12 = hr > 12 ? hr - 12 : (hr === 0 ? 12 : hr);
     var fmtTime = hr12 + ':' + min + ' ' + period;
+
+    var btn = document.querySelector('#panel-events .btn-primary');
+    setLoading(btn, true);
 
     try {
         var formData = new FormData();
@@ -819,39 +842,41 @@ async function addEvent() {
             updateStats();
             showToast('✅ Event "' + title + '" posted!');
         } else {
-            alert(data.message || 'Failed to post event.');
+            showToast('❌ ' + (data.message || 'Failed to post event.'));
         }
     } catch (error) {
-        alert('Server error. Make sure XAMPP is running.');
+        showToast('⚠️ Server error. Make sure XAMPP is running.');
+    } finally {
+        setLoading(btn, false);
     }
 }
 
 /**
  * deleteEvent(id) — calls delete_event.php → DELETE from MySQL.
  */
-async function deleteEvent(id) {
-    if (!confirm('Delete this event?')) return;
+function deleteEvent(id) {
+    showConfirm('Delete this event?', async function () {
+        try {
+            var formData = new FormData();
+            formData.append('id', id);
 
-    try {
-        var formData = new FormData();
-        formData.append('id', id);
+            var response = await fetch('php/delete_event.php', { method: 'POST', body: formData });
+            var data = await response.json();
 
-        var response = await fetch('php/delete_event.php', { method: 'POST', body: formData });
-        var data = await response.json();
-
-        if (data.success) {
-            /* Reload events from DB */
-            await loadEvents();
-            renderDashboard();
-            renderEvents();
-            updateStats();
-            showToast('Event deleted.');
-        } else {
-            alert(data.message || 'Delete failed.');
+            if (data.success) {
+                /* Reload events from DB */
+                await loadEvents();
+                renderDashboard();
+                renderEvents();
+                updateStats();
+                showToast('🗑️ Event deleted.');
+            } else {
+                showToast('❌ ' + (data.message || 'Delete failed.'));
+            }
+        } catch (error) {
+            showToast('⚠️ Server error. Make sure XAMPP is running.');
         }
-    } catch (error) {
-        alert('Server error. Make sure XAMPP is running.');
-    }
+    });
 }
 
 
@@ -894,6 +919,8 @@ function editEvent(id) {
     }).join('');
 
     document.getElementById('editEventModal').classList.add('open');
+    /* Auto-focus event title field */
+    setTimeout(function () { document.getElementById('editEvTitle').focus(); }, 100);
 }
 
 /**
@@ -910,7 +937,7 @@ async function saveEvent() {
     var desc = document.getElementById('editEvDesc').value.trim();
 
     if (!title || !date || !venue) {
-        alert('Please fill in Title, Date, and Venue.');
+        showToast('⚠️ Please fill in Title, Date, and Venue.');
         return;
     }
 
@@ -944,10 +971,10 @@ async function saveEvent() {
             updateStats();
             showToast('✅ Event updated successfully!');
         } else {
-            alert(data.message || 'Failed to update event.');
+            showToast('❌ ' + (data.message || 'Failed to update event.'));
         }
     } catch (error) {
-        alert('Server error. Make sure XAMPP is running.');
+        showToast('⚠️ Server error. Make sure XAMPP is running.');
     }
 }
 
@@ -977,6 +1004,8 @@ function editClub(id) {
     document.getElementById('editClubDesc').value = club.description;
 
     document.getElementById('editClubModal').classList.add('open');
+    /* Auto-focus club name field */
+    setTimeout(function () { document.getElementById('editClubName').focus(); }, 100);
 }
 
 /**
@@ -988,7 +1017,7 @@ async function saveClub() {
     var cat = document.getElementById('editClubCat').value;
     var desc = document.getElementById('editClubDesc').value.trim();
 
-    if (!name) { alert('Please enter a club name.'); return; }
+    if (!name) { showToast('⚠️ Please enter a club name.'); return; }
 
     try {
         var formData = new FormData();
@@ -1008,10 +1037,10 @@ async function saveClub() {
             updateStats();
             showToast('✅ Club updated successfully!');
         } else {
-            alert(data.message || 'Failed to update club.');
+            showToast('❌ ' + (data.message || 'Failed to update club.'));
         }
     } catch (error) {
-        alert('Server error. Make sure XAMPP is running.');
+        showToast('⚠️ Server error. Make sure XAMPP is running.');
     }
 }
 
@@ -1080,7 +1109,7 @@ async function loadRegistrations() {
 function exportCSV() {
     var eventId = document.getElementById('reportEventSelect').value;
     if (!eventId) {
-        alert('Please select an event first.');
+        showToast('⚠️ Please select an event first.');
         return;
     }
     /* Open the export URL — browser will handle the file download */
@@ -1129,7 +1158,7 @@ function initMap() {
     /* Create the map centered on a sample campus location */
     var map = L.map('campusMap', {
         scrollWheelZoom: false  /* Prevent accidental zoom while scrolling page */
-    }).setView([17.3850, 78.4867], 15);  /* Hyderabad area coordinates */
+    }).setView([19.900514833070407, 74.49478500923182], 15);  /* Hyderabad area coordinates */
 
     /* Add OpenStreetMap tile layer */
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1138,13 +1167,13 @@ function initMap() {
     }).addTo(map);
 
     /* Add a marker for the campus */
-    var marker = L.marker([17.3850, 78.4867]).addTo(map);
+    var marker = L.marker([19.900514833070407, 74.49478500923182]).addTo(map);
     marker.bindPopup(
-        '<strong>🎓 CampusConnect</strong><br>College Campus<br><em>Hyderabad, India</em>'
+        '<strong>🎓 CampusConnect</strong><br>College Campus<br><em>Kopargaon, Maharashtra, India</em>'
     ).openPopup();
 
     /* Add a circle to highlight the campus area */
-    L.circle([17.3850, 78.4867], {
+    L.circle([19.900514833070407, 74.49478500923182], {
         color: '#1d4ed8',
         fillColor: '#3b82f6',
         fillOpacity: 0.15,
@@ -1157,6 +1186,186 @@ function initMap() {
 
 
 /* ──────────────────────────────────────
+   SECTION 21: PASSWORD TOGGLE
+────────────────────────────────────── */
+
+/**
+ * togglePassword() — toggles password field visibility.
+ */
+function togglePassword() {
+    var passInput = document.getElementById('loginPass');
+    var btn = document.getElementById('togglePassBtn');
+    if (passInput.type === 'password') {
+        passInput.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        passInput.type = 'password';
+        btn.textContent = '👁';
+    }
+}
+
+
+/* ──────────────────────────────────────
+   SECTION 22: CUSTOM CONFIRM MODAL
+   Replaces browser's plain confirm() dialog
+────────────────────────────────────── */
+
+var _confirmCallback = null;
+
+/**
+ * showConfirm(message, onYes) — shows a styled confirmation modal.
+ * @param {string} message — the question to display
+ * @param {function} onYes  — callback executed if user clicks "Yes, Delete"
+ */
+function showConfirm(message, onYes) {
+    _confirmCallback = onYes;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmModal').classList.add('open');
+
+    var yesBtn = document.getElementById('confirmYesBtn');
+    yesBtn.onclick = function () {
+        closeConfirm();
+        if (_confirmCallback) _confirmCallback();
+    };
+}
+
+function closeConfirm() {
+    document.getElementById('confirmModal').classList.remove('open');
+    _confirmCallback = null;
+}
+
+function closeConfirmOnBg(event) {
+    if (event.target === document.getElementById('confirmModal')) closeConfirm();
+}
+
+
+/* ──────────────────────────────────────
+   SECTION 23: LOADING STATE HELPER
+────────────────────────────────────── */
+
+/**
+ * setLoading(btn, isLoading) — disables a button and shows a loading spinner.
+ */
+function setLoading(btn, isLoading) {
+    if (!btn) return;
+    if (isLoading) {
+        btn.dataset.originalText = btn.textContent;
+        btn.textContent = '⏳ Please wait…';
+        btn.disabled = true;
+        btn.classList.add('btn-loading');
+    } else {
+        btn.textContent = btn.dataset.originalText || 'Submit';
+        btn.disabled = false;
+        btn.classList.remove('btn-loading');
+    }
+}
+
+
+/* ──────────────────────────────────────
+   SECTION 24: KEYBOARD SHORTCUTS
+   Enter key submits forms, Escape closes modals
+────────────────────────────────────── */
+
+/**
+ * Login form — Enter key triggers doLogin()
+ */
+['loginId', 'loginPass'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            doLogin();
+        }
+    });
+});
+
+/**
+ * Forgot Password form — Enter key triggers forgotPassword()
+ */
+['forgotCoordId', 'forgotDeptName'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            forgotPassword();
+        }
+    });
+});
+
+/**
+ * RSVP form — Enter key triggers submitRSVP()
+ */
+['rsvpName', 'rsvpEmail'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitRSVP();
+        }
+    });
+});
+
+/**
+ * Dashboard forms — Enter key triggers form submit
+ */
+['newClubName', 'newClubDesc'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            addClub();
+        }
+    });
+});
+
+['newEvTitle', 'newEvVenue'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addEvent();
+        }
+    });
+});
+
+/**
+ * Escape key — closes any open modal
+ */
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        if (document.getElementById('confirmModal').classList.contains('open')) {
+            closeConfirm();
+        } else if (document.getElementById('modal').classList.contains('open')) {
+            closeModal();
+        } else if (document.getElementById('editEventModal').classList.contains('open')) {
+            closeEditEvent();
+        } else if (document.getElementById('editClubModal').classList.contains('open')) {
+            closeEditClub();
+        }
+    }
+});
+
+
+/* ──────────────────────────────────────
+   SECTION 25: SCROLL SPY — Active Nav Link
+   Highlights the nav link matching the section currently in view
+────────────────────────────────────── */
+
+window.addEventListener('scroll', function () {
+    var sections = ['section-events', 'section-clubs', 'section-about'];
+    var navLinks = document.querySelectorAll('.nav-links a');
+    var scrollPos = window.scrollY + 140; /* offset for navbar height + buffer */
+
+    /* Remove all active states first */
+    navLinks.forEach(function (link) { link.classList.remove('active'); });
+
+    for (var i = sections.length - 1; i >= 0; i--) {
+        var section = document.getElementById(sections[i]);
+        if (section && scrollPos >= section.offsetTop) {
+            navLinks[i].classList.add('active');
+            break;
+        }
+    }
+});
+
+
+/* ──────────────────────────────────────
    START — Run init() on page load
 ────────────────────────────────────── */
 init();
+
